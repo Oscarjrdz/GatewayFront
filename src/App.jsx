@@ -565,7 +565,7 @@ Respuesta: { "qr": "data:image/png;base64,....." }
               </div>
               <p style={{marginBottom: '1rem', fontSize: '0.85rem'}}>Documentación completa para construir tus integradores usando esta puerta de enlace. Selecciona un proceso:</p>
               
-              <div style={{display: 'grid', gridTemplateColumns: '270px 1fr', gap: '1.5rem', marginTop: '1rem'}} className="api-section">
+              <div style={{display: 'grid', gridTemplateColumns: '270px minmax(0, 1fr)', gap: '1.5rem', marginTop: '1rem'}} className="api-section">
                 
                 {/* Menú Lateral Estilo Ultramsg */}
                 <div style={{background: 'rgba(0,0,0,0.2)', padding:'1rem', borderRadius: '12px'}}>
