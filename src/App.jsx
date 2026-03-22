@@ -132,10 +132,44 @@ function App() {
       
       showToast('Mensaje enviado maravillosamente');
       setMessageBody('');
+      checkStatus(); // Refresh counters
     } catch (error) {
       showToast(error.message, 'error');
     }
     setSendingMsg(false);
+  };
+
+  const saveWebhook = async () => {
+    try {
+      const res = await fetch(`${API_URL}/${instance.id}/settings/webhook`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: instance.token,
+          webhook_url: instance.webhook_url || '',
+          webhook_message_received: instance.webhook_message_received || false
+        })
+      });
+      const data = await res.json();
+      if (data.success) showToast('Webhook guardado exitosamente');
+    } catch (err) {
+      showToast('Error al guardar webhook', 'error');
+    }
+  };
+
+  const deleteInstance = async () => {
+    if(!window.confirm('¿Seguro que deseas eliminar esta instancia y desconectar su número permanentemente?')) return;
+    try {
+      await fetch(`${API_URL}/${instance.id}/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: instance.token })
+      });
+      showToast('Instancia eliminada');
+      handleLogout();
+    } catch (err) {
+      showToast('Error al eliminar', 'error');
+    }
   };
 
   const handleLogout = () => {
@@ -212,7 +246,7 @@ function App() {
             ) : (
               <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem'}}>
                 {allInstances.map((inst) => (
-                  <div key={inst.instance_id} className="copy-field" style={{flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', cursor: 'pointer', border: '1px solid var(--border-color)'}} onClick={() => {
+                  <div key={inst.instance_id} className="copy-field" style={{flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', cursor: 'pointer', border: '1px solid var(--border-color)', position: 'relative'}} onClick={() => {
                       setInputId(inst.instance_id.replace('instance', ''));
                       setInputToken(inst.token);
                       showToast('Credenciales autollenadas. Haz click en Ingresar');
@@ -221,7 +255,11 @@ function App() {
                       <strong style={{color: 'var(--brand-color)'}}>{inst.instance_id}</strong>
                       <span className="status-badge" style={{fontSize: '0.6rem', padding: '2px 6px', background: inst.status === 'authenticated' ? 'var(--success)' : 'var(--error)', color: 'white', borderRadius: '4px'}}>{inst.status}</span>
                     </div>
-                    <code style={{fontSize: '0.75rem'}}>Token: {inst.token.substring(0,8)}...</code>
+                    <code style={{fontSize: '0.75rem', marginBottom: '0.5rem'}}>Token: {inst.token.substring(0,8)}...</code>
+                    <div style={{display: 'flex', gap: '0.5rem', fontSize: '0.75rem', color: 'gray'}}>
+                      <span>📤 {inst.messages_sent || 0}</span>
+                      <span>📥 {inst.messages_received || 0}</span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -238,6 +276,20 @@ function App() {
               <div className="status-badge">
                 <div className="status-dot"></div>
                 {status === 'loading' ? 'CARGANDO...' : status === 'qr' ? 'EN ESPERA DE QR' : status === 'authenticated' ? 'CONECTADO Y LISTO' : 'DESCONECTADO'}
+              </div>
+            </div>
+
+            <div style={{marginBottom: '2rem'}}>
+              <h3 style={{fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '1rem', letterSpacing: '1px'}}>Métricas</h3>
+              <div style={{display: 'flex', gap: '1rem'}}>
+                <div style={{background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', flex: '1', textAlign: 'center'}}>
+                  <div style={{fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-primary)'}}>{instance.messages_sent || 0}</div>
+                  <div style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>Enviados</div>
+                </div>
+                <div style={{background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', flex: '1', textAlign: 'center'}}>
+                  <div style={{fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-primary)'}}>{instance.messages_received || 0}</div>
+                  <div style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>Recibidos</div>
+                </div>
               </div>
             </div>
 
@@ -283,53 +335,86 @@ function App() {
                  <p style={{color: 'var(--text-primary)', fontSize:'0.75rem', textAlign:'center', marginTop:'8px'}}>Tu APi está lista para enviar y recibir mensajes a través de webhooks.</p>
               </div>
             )}
+            
+            <button onClick={deleteInstance} className="btn" style={{background: 'transparent', border: '1px solid var(--error)', color: 'var(--error)', marginTop: 'auto', paddingTop:'0.75rem', paddingBottom:'0.75rem'}}>Eliminar Instancia</button>
 
           </div>
 
           {/* Main Area */}
-          <div className="glass-card">
-            <h2 style={{borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem'}}>Petición APi de Prueba</h2>
-            
-            <form onSubmit={handleSendMessage}>
+          <div style={{display: 'flex', flexDirection: 'column', gap: '2rem'}}>
+            <div className="glass-card">
+              <h2 style={{borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem'}}>Petición APi de Prueba</h2>
+              
+              <form onSubmit={handleSendMessage}>
+                <div className="input-group">
+                  <label>Número de WhatsApp Destino (incluye código de país)</label>
+                  <input 
+                    type="text" 
+                    placeholder="ej. +528114445555" 
+                    value={phoneTo} 
+                    onChange={e => setPhoneTo(e.target.value)}
+                    disabled={status !== 'authenticated'}
+                  />
+                </div>
+
+                <div className="input-group">
+                  <label>Mensaje Body (Texto o JSON stringificado)</label>
+                  <textarea 
+                    rows="4"
+                    placeholder="Escribe tu mensaje aquí..." 
+                    value={messageBody} 
+                    onChange={e => setMessageBody(e.target.value)}
+                    disabled={status !== 'authenticated'}
+                    style={{resize: 'vertical'}}
+                  />
+                </div>
+
+                <button 
+                  type="submit" 
+                  className={`btn ${status === 'authenticated' ? 'btn-primary' : 'btn-secondary'}`} 
+                  disabled={status !== 'authenticated' || sendingMsg}
+                  style={{maxWidth: '250px'}}
+                >
+                  {sendingMsg ? (
+                    <div className="loader" style={{borderColor: 'rgba(255,255,255,0.4)', borderTopColor: 'white'}}></div>
+                  ) : (
+                    <>
+                      <span>Enviar POST Request</span>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
+
+            <div className="glass-card">
+              <h2 style={{borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem'}}>Configuración Webhook</h2>
+              
               <div className="input-group">
-                <label>Número de WhatsApp Destino (incluye código de país)</label>
+                <label>Webhook URL (para recibir eventos POST desde WhatsApp)</label>
                 <input 
-                  type="text" 
-                  placeholder="ej. +528114445555" 
-                  value={phoneTo} 
-                  onChange={e => setPhoneTo(e.target.value)}
-                  disabled={status !== 'authenticated'}
+                  type="url" 
+                  placeholder="https://tudominio.com/webhook" 
+                  value={instance?.webhook_url || ''} 
+                  onChange={e => setInstance({...instance, webhook_url: e.target.value})}
                 />
               </div>
 
-              <div className="input-group">
-                <label>Mensaje Body (Texto o JSON stringificado)</label>
-                <textarea 
-                  rows="4"
-                  placeholder="Escribe tu mensaje aquí..." 
-                  value={messageBody} 
-                  onChange={e => setMessageBody(e.target.value)}
-                  disabled={status !== 'authenticated'}
-                  style={{resize: 'vertical'}}
+              <div className="input-group" style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
+                <input 
+                  type="checkbox" 
+                  id="webhook_msgs"
+                  checked={instance?.webhook_message_received || false} 
+                  onChange={e => setInstance({...instance, webhook_message_received: e.target.checked})}
+                  style={{width: 'auto', transform: 'scale(1.2)'}}
                 />
+                <label htmlFor="webhook_msgs" style={{marginBottom: 0, cursor: 'pointer'}}>
+                  Llamar Webhook cuando recibas un mensaje 📥
+                </label>
               </div>
 
-              <button 
-                type="submit" 
-                className={`btn ${status === 'authenticated' ? 'btn-primary' : 'btn-secondary'}`} 
-                disabled={status !== 'authenticated' || sendingMsg}
-                style={{maxWidth: '250px'}}
-              >
-                {sendingMsg ? (
-                  <div className="loader" style={{borderColor: 'rgba(255,255,255,0.4)', borderTopColor: 'white'}}></div>
-                ) : (
-                  <>
-                    <span>Enviar POST Request</span>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                  </>
-                )}
-              </button>
-            </form>
+              <button className="btn btn-secondary" onClick={saveWebhook} style={{maxWidth: '200px'}}>Guardar Ajustes</button>
+            </div>
           </div>
         </div>
       )}
