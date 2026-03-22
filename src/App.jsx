@@ -492,8 +492,11 @@ function App() {
                     </div>
                   </div>
 
-                  <h4 style={{fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>Cuenta / Instancia</h4>
+                  <h4 style={{fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>Herramientas</h4>
                   <div className="api-menu" style={{marginTop: 0}}>
+                    <div className="api-menu-item" onClick={() => setApiTab('profile_pic')} style={{background: apiTab === 'profile_pic' ? 'rgba(255,255,255,0.05)' : ''}}>
+                       <span className="api-badge get">GET</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>FOTO PERFIL</span>
+                    </div>
                     <div className="api-menu-item" onClick={() => setApiTab('create_instance')} style={{background: apiTab === 'create_instance' ? 'rgba(255,255,255,0.05)' : ''}}>
                        <span className="api-badge post">POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>CREAR</span>
                     </div>
@@ -508,6 +511,24 @@ function App() {
 
                 {/* Contenido / Code Snippets */}
                 <div>
+                  {apiTab === 'profile_pic' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Obtener Foto de Perfil WhatsApp</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Extrae la URL de la foto de perfil en alta resolución de cualquier número de WhatsApp en el mundo pasando el parámetro <code>to</code>.</p>
+                      <div className="api-code-panel">
+<pre>{`const response = await axios.get(
+  '${API_URL}/${instance.id}/contacts/profile-picture?token=${instance.token}&to=+528110000000'
+);
+
+// Resultado: Link estático directo al avatar de la persona
+{
+  "jid": "5218110000000@s.whatsapp.net",
+  "profile_picture": "https://pps.whatsapp.net/v/t61.24694-24/302..."
+}`}</pre>
+                      </div>
+                    </>
+                  )}
+
                   {apiTab === 'create_instance' && (
                     <>
                       <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Crear Nueva Instancia APi Dinámicamente</h3>
