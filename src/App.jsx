@@ -415,6 +415,35 @@ function App() {
 
               <button className="btn btn-secondary" onClick={saveWebhook} style={{maxWidth: '200px'}}>Guardar Ajustes</button>
             </div>
+
+            <div className="glass-card" style={{border: '1px solid var(--brand-color)'}}>
+              <h2 style={{borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem', color:'var(--brand-color)'}}>🚀 Código de Integración APi</h2>
+              <p style={{marginBottom: '1rem', fontSize: '0.85rem'}}>Usa este snippet de código en tus otros proyectos para conectar a este Gateway directamente enviando mensajes de texto. Copia y pega en tu servidor Node.js:</p>
+              
+              <div style={{position: 'relative', background: '#0d1117', borderRadius: '8px', padding: '1.5rem', overflow: 'auto', border: '1px solid #30363d'}}>
+                <pre style={{margin: 0, color: '#e6edf3', fontSize: '0.8rem', lineHeight: '1.5', fontFamily: 'monospace'}}>
+{`const axios = require('axios');
+
+const enviarWhatsApp = async (numeroDestino, mensaje) => {
+  try {
+    const response = await axios.post('${API_URL}/${instance.id}/messages/chat', {
+      token: '${instance.token}',
+      to: numeroDestino,
+      body: mensaje
+    });
+    console.log('Mensaje enviado!', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error enviando:', error.response?.data || error.message);
+  }
+};
+
+// Uso:
+enviarWhatsApp('+528110000000', '¡Hola desde mi otro sistema!');`}
+                </pre>
+              </div>
+              <p style={{marginTop: '1rem', fontSize: '0.85rem'}}>Para imágenes usa la ruta <code>/messages/image</code> con el parámetro <code>image: "url"</code> en lugar de <code>body</code>.</p>
+            </div>
           </div>
         </div>
       )}
