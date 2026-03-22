@@ -480,6 +480,12 @@ function App() {
                     <div className="api-menu-item" onClick={() => setApiTab('document')} style={{background: apiTab === 'document' ? 'rgba(255,255,255,0.05)' : ''}}>
                        <span className="api-badge post">POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>DOCUMENT</span>
                     </div>
+                    <div className="api-menu-item" onClick={() => setApiTab('audio')} style={{background: apiTab === 'audio' ? 'rgba(255,255,255,0.05)' : ''}}>
+                       <span className="api-badge post">POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>AUDIO</span>
+                    </div>
+                    <div className="api-menu-item" onClick={() => setApiTab('presence')} style={{background: apiTab === 'presence' ? 'rgba(255,255,255,0.05)' : ''}}>
+                       <span className="api-badge post" style={{background: '#d97706'}}>POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>PRESENCIA</span>
+                    </div>
                   </div>
 
                   <h4 style={{fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>Webhooks (Entrantes)</h4>
@@ -511,6 +517,35 @@ function App() {
 
                 {/* Contenido / Code Snippets */}
                 <div>
+                  {apiTab === 'audio' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Enviar Notas de Voz (Audios)</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Envía archivos <code>.mp3</code>, <code>.mp4</code> o <code>.ogg</code> pasando su URL con el parámetro <code>audio</code>. Si envías el flag especial <code>ptt: true</code>, el usuario no verá un "reproductor de música", sino que la burbuja se verá y reproducirá como una <strong>Nota de Voz natural de WhatsApp</strong> (Push To Talk).</p>
+                      <div className="api-code-panel">
+<pre>{`const response = await axios.post('${API_URL}/${instance.id}/messages/audio', {
+  token: '${instance.token}',
+  to: '+528110000000',
+  audio: 'https://ejemplo.com/bienvenida.mp3',
+  ptt: true
+});`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'presence' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Fingir Actividad Intermitente (Humanizar el Bot)</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>El estado no es un mensaje. Apoya psicológicamente a que parezca una persona real mostrando "Escribiendo..." (<code>composing</code>), "Grabando audio..." (<code>recording</code>) o "En línea" (<code>available</code>). Mándalo un par de segundos <strong>antes</strong> de enviar tu mensaje real de texto.</p>
+                      <div className="api-code-panel">
+<pre>{`// Mostrar "Escribiendo..." en el chat del usuario
+const response = await axios.post('${API_URL}/${instance.id}/presence', {
+  token: '${instance.token}',
+  to: '+528110000000',
+  status: 'composing' // opciones: 'available', 'composing', 'recording', 'paused'
+});`}</pre>
+                      </div>
+                    </>
+                  )}
                   {apiTab === 'profile_pic' && (
                     <>
                       <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Obtener Foto de Perfil WhatsApp</h3>
