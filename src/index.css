@@ -33,19 +33,21 @@ body {
   background-attachment: fixed;
   color: var(--text-primary);
   min-height: 100vh;
+  margin: 0;
+  width: 100vw;
+  overflow-x: hidden;
 }
 
 #root {
-  width: 100%;
+  width: 100vw;
   min-height: 100vh;
-  display: flex;
-  justify-content: center;
 }
 
 .app-container {
-  max-width: 1050px;
-  width: 100%;
-  margin: 0 auto;
+  display: block !important;
+  max-width: 1050px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
   padding: 2rem;
 }
 
