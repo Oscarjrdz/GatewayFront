@@ -361,9 +361,12 @@ input:focus, textarea:focus {
 .api-badge {
   font-size: 0.65rem;
   font-weight: 700;
-  padding: 2px 6px;
+  padding: 3px 0;
   border-radius: 4px;
   margin-right: 0.75rem;
+  display: inline-block;
+  width: 54px;
+  text-align: center;
 }
 
 .api-badge.post {
