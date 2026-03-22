@@ -196,7 +196,7 @@ function App() {
           
           <form onSubmit={(e) => {
             e.preventDefault();
-            if (masterPassword === 'izzigo2026' || masterPassword === '1234') { // Temporal password till Google auth
+            if (masterPassword === '8116038195') { // Temporal password till Google auth
               localStorage.setItem('admin_access', 'true');
               setIsAuthorized(true);
             } else {
