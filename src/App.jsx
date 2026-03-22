@@ -326,8 +326,9 @@ function App() {
 
             <div style={{marginBottom: '2rem'}}>
               <h3 style={{fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '1rem', letterSpacing: '1px'}}>Métricas</h3>
-              <div style={{display: 'flex', gap: '1rem'}}>
-                <div style={{background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', flex: '1', textAlign: 'center'}}>
+              <div style={{display: 'grid', gridTemplateColumns: '270px 1fr', gap: '2rem'}}>
+                {/* Menú Izquierdo */}
+                <div style={{background: '#0f172a', padding: '1rem', borderRadius: '12px', border: '1px solid #1e293b'}}>
                   <div style={{fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-primary)'}}>{instance.messages_sent || 0}</div>
                   <div style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>Enviados</div>
                 </div>
@@ -465,7 +466,7 @@ function App() {
               <h2 style={{borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem', color:'var(--brand-color)'}}>🚀 Referencia APi & Webhooks</h2>
               <p style={{marginBottom: '1rem', fontSize: '0.85rem'}}>Documentación completa para construir tus integradores usando esta puerta de enlace. Selecciona un proceso:</p>
               
-              <div style={{display: 'grid', gridTemplateColumns: '220px 1fr', gap: '1.5rem', marginTop: '1rem'}} className="api-section">
+              <div style={{display: 'grid', gridTemplateColumns: '270px 1fr', gap: '1.5rem', marginTop: '1rem'}} className="api-section">
                 
                 {/* Menú Lateral Estilo Ultramsg */}
                 <div style={{background: 'rgba(0,0,0,0.2)', padding:'1rem', borderRadius: '12px'}}>
