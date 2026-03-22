@@ -19,15 +19,28 @@ function App() {
   const [messageBody, setMessageBody] = useState('');
   const [sendingMsg, setSendingMsg] = useState(false);
 
+  // List of all instances in Backend
+  const [allInstances, setAllInstances] = useState([]);
+
   useEffect(() => {
     // If we have an instance, poll the status every 4 seconds
     let interval;
     if (instance) {
       checkStatus();
       interval = setInterval(checkStatus, 4000);
+    } else {
+      fetchAllInstances();
     }
     return () => clearInterval(interval);
   }, [instance]);
+
+  const fetchAllInstances = async () => {
+    try {
+      const res = await fetch(`${API_URL}/instances`);
+      const data = await res.json();
+      setAllInstances(data);
+    } catch (e) { console.error('Error fetching list', e); }
+  };
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
@@ -153,41 +166,67 @@ function App() {
       </header>
 
       {!instance ? (
-        <div className="auth-grid">
-          <div className="glass-card">
-            <h2>Crear nueva instancia</h2>
-            <p style={{marginBottom: '2rem'}}>Genera un nuevo entorno aislado para enlazar un número de WhatsApp. Obtendrás un InstanceID y Token exclusivos.</p>
-            <button className="btn btn-primary" onClick={handleCreateNew} disabled={loading}>
-              {loading ? <div className="loader"></div> : 'Generar Instancia Automática'}
-            </button>
+        <div style={{display: 'flex', flexDirection: 'column', gap: '2rem'}}>
+          <div className="auth-grid">
+            <div className="glass-card">
+              <h2>Crear nueva instancia</h2>
+              <p style={{marginBottom: '2rem'}}>Genera un nuevo entorno aislado para enlazar un número de WhatsApp. Obtendrás un InstanceID y Token exclusivos.</p>
+              <button className="btn btn-primary" onClick={handleCreateNew} disabled={loading}>
+                {loading ? <div className="loader"></div> : 'Generar Instancia Automática'}
+              </button>
+            </div>
+
+            <div className="glass-card">
+              <h2>Acceder a mi APi existente</h2>
+              <p style={{marginBottom: '1.5rem'}}>Ingresa con tus credenciales de Gateway previamente generadas.</p>
+              <form onSubmit={handleLogin}>
+                <div className="input-group">
+                  <label>Instance ID</label>
+                  <input 
+                    type="text" 
+                    placeholder="ej. instance123456" 
+                    value={inputId} 
+                    onChange={e => setInputId(e.target.value)}
+                  />
+                </div>
+                <div className="input-group">
+                  <label>Token de Seguridad</label>
+                  <input 
+                    type="password" 
+                    placeholder="*****************" 
+                    value={inputToken} 
+                    onChange={e => setInputToken(e.target.value)}
+                  />
+                </div>
+                <button type="submit" className="btn btn-secondary" disabled={loading}>
+                   {loading ? <div className="loader" style={{borderColor: 'rgba(255,255,255,0.4)', borderTopColor: 'white'}}></div> : 'Ingresar al Dashboard'}
+                </button>
+              </form>
+            </div>
           </div>
 
-          <div className="glass-card">
-            <h2>Acceder a mi APi existente</h2>
-            <p style={{marginBottom: '1.5rem'}}>Ingresa con tus credenciales de Gateway previamente generadas.</p>
-            <form onSubmit={handleLogin}>
-              <div className="input-group">
-                <label>Instance ID</label>
-                <input 
-                  type="text" 
-                  placeholder="ej. instance123456" 
-                  value={inputId} 
-                  onChange={e => setInputId(e.target.value)}
-                />
+          <div className="glass-card" style={{maxWidth: '900px', margin: '0 auto', width: '100%'}}>
+            <h2 style={{borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1rem'}}>Tus Instancias Activas (Master Dashboard)</h2>
+            {allInstances.length === 0 ? (
+              <p>No se han encontrado instancias en tu servidor de Railway.</p>
+            ) : (
+              <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem'}}>
+                {allInstances.map((inst) => (
+                  <div key={inst.instance_id} className="copy-field" style={{flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', cursor: 'pointer', border: '1px solid var(--border-color)'}} onClick={() => {
+                      setInputId(inst.instance_id.replace('instance', ''));
+                      setInputToken(inst.token);
+                      showToast('Credenciales autollenadas. Haz click en Ingresar');
+                  }}>
+                    <div style={{display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '0.5rem'}}>
+                      <strong style={{color: 'var(--brand-color)'}}>{inst.instance_id}</strong>
+                      <span className="status-badge" style={{fontSize: '0.6rem', padding: '2px 6px', background: inst.status === 'authenticated' ? 'var(--success)' : 'var(--error)', color: 'white', borderRadius: '4px'}}>{inst.status}</span>
+                    </div>
+                    <code style={{fontSize: '0.75rem'}}>Token: {inst.token.substring(0,8)}...</code>
+                  </div>
+                ))}
               </div>
-              <div className="input-group">
-                <label>Token de Seguridad</label>
-                <input 
-                  type="password" 
-                  placeholder="*****************" 
-                  value={inputToken} 
-                  onChange={e => setInputToken(e.target.value)}
-                />
-              </div>
-              <button type="submit" className="btn btn-secondary" disabled={loading}>
-                 {loading ? <div className="loader" style={{borderColor: 'rgba(255,255,255,0.4)', borderTopColor: 'white'}}></div> : 'Ingresar al Dashboard'}
-              </button>
-            </form>
+            )}
+            <button className="btn btn-secondary" style={{marginTop: '1rem'}} onClick={fetchAllInstances}>Recargar Lista</button>
           </div>
         </div>
       ) : (
