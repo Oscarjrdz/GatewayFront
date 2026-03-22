@@ -448,16 +448,55 @@ function App() {
                     </div>
                   </div>
 
-                  <h4 style={{fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>Cuenta</h4>
+                  <h4 style={{fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>Cuenta / Instancia</h4>
                   <div className="api-menu" style={{marginTop: 0}}>
+                    <div className="api-menu-item" onClick={() => setApiTab('create_instance')} style={{background: apiTab === 'create_instance' ? 'rgba(255,255,255,0.05)' : ''}}>
+                       <span className="api-badge post">POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>CREAR</span>
+                    </div>
                     <div className="api-menu-item" onClick={() => setApiTab('status')} style={{background: apiTab === 'status' ? 'rgba(255,255,255,0.05)' : ''}}>
                        <span className="api-badge get">GET</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>STATUS</span>
+                    </div>
+                    <div className="api-menu-item" onClick={() => setApiTab('qr')} style={{background: apiTab === 'qr' ? 'rgba(255,255,255,0.05)' : ''}}>
+                       <span className="api-badge get">GET</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>QR CODE</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Contenido / Code Snippets */}
                 <div>
+                  {apiTab === 'create_instance' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Crear Nueva Instancia APi Dinámicamente</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Si estás construyendo un SaaS y necesitas generar contenedores automáticos para tus propios clientes, solo haz un request vacío y recibe las llaves maestras.</p>
+                      <div className="api-code-panel">
+<pre>{`const axios = require('axios');
+
+const response = await axios.post('${API_URL}/instances');
+
+// Resultado: Guarda estas credenciales en la DB de tu cliente
+{
+  "instance_id": "instance9f8b4a2c1e",
+  "token": "4c210383c66241af8c04e5dfd244b593"
+}`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'qr' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Obtener Código QR (Base64)</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Solicita el código QR más reciente para inyectarlo en tu propia página web en una etiqueta <code>&lt;img src=.../&gt;</code>.</p>
+                      <div className="api-code-panel">
+<pre>{`const response = await axios.get('${API_URL}/${instance.id}/qr?token=${instance.token}');
+
+// Resultado: String puro listo para HTML
+{
+  "instanceId": "${instance.id}",
+  "qr": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+}`}</pre>
+                      </div>
+                    </>
+                  )}
                   {apiTab === 'chat' && (
                     <>
                       <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Enviar Chat (Texto o Emojis)</h3>
