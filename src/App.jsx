@@ -182,6 +182,100 @@ function App() {
     setQrCode(null);
   };
 
+  const handleCopyDocumentation = () => {
+    const doc = `
+WHATSAPP GATEWAY API REFERENCE
+
+Base URL: ${API_URL}
+Instancia Actual: ${instance?.id || 'instance123'}
+Token: ${instance?.token || 'abc123token'}
+
+=== MENSAJES SALIENTES (POST) ===
+
+1. ENVIAR CHAT (Texto/Emojis)
+POST /:instanceId/messages/chat
+{
+  "token": "TU_TOKEN",
+  "to": "+528110000000",
+  "body": "¡Hola Mundo! 🚀"
+}
+
+2. ENVIAR IMAGEN
+POST /:instanceId/messages/image
+{
+  "token": "TU_TOKEN",
+  "to": "+528110000000",
+  "image": "https://url.com/foto.jpg",
+  "caption": "Pie de foto opcional"
+}
+
+3. ENVIAR DOCUMENTO (PDF/ZIP/EXCEL)
+POST /:instanceId/messages/document
+{
+  "token": "TU_TOKEN",
+  "to": "+528110000000",
+  "document": "https://url.com/reporte.pdf",
+  "filename": "Reporte.pdf"
+}
+
+4. ENVIAR AUDIO (Notas de Voz / PTT)
+POST /:instanceId/messages/audio
+{
+  "token": "TU_TOKEN",
+  "to": "+528110000000",
+  "audio": "https://url.com/audio.mp3",
+  "ptt": true // True transforma a Nota de Voz nativa
+}
+
+5. CONTROL DE PRESENCIA (Escribiendo/Grabando)
+POST /:instanceId/presence
+{
+  "token": "TU_TOKEN",
+  "to": "+528110000000",
+  "status": "composing" // available | composing | recording | paused
+}
+
+=== WEBHOOKS PARAMS (ENTRANTES) ===
+
+Cuando un cliente escribe, tu servidor recibe un POST JSON con:
+{
+  "event_type": "message_received",
+  "instanceId": "instance123",
+  "data": {
+    "pushName": "Oscar 🚀",
+    "key": {
+      "remoteJid": "5218110000000@s.whatsapp.net",
+      "fromMe": false
+    },
+    "message": { "conversation": "Deseo pedir pizza" },
+    "messageTimestamp": 1679091234
+  }
+}
+* Extraer Texto:   data.message.conversation ó data.message.extendedTextMessage.text
+* Extraer Teléfono: data.key.remoteJid (limpia el @s.whatsapp.net)
+* Validar Cliente:  Ignorar evento si data.key.fromMe es true
+
+=== HERRAMIENTAS DIRECTAS ===
+
+1. FOTO DE PERFIL (GET)
+GET /:instanceId/contacts/profile-picture?token=TU_TOKEN&to=+528110000000
+Respuesta: { "profile_picture": "https://..." }
+
+2. CREACION DE INSTANCIAS (SaaS POST)
+POST /instances (Body Vacío)
+Respuesta: { "instance_id": "...", "token": "..." }
+
+3. METRICAS / STATUS (GET)
+GET /:instanceId/status?token=TU_TOKEN
+Respuesta: { "status": "authenticated", "messages_sent": 142, "messages_received": 1058 }
+
+4. CODIGO QR BASE 64 (GET)
+GET /:instanceId/qr?token=TU_TOKEN
+Respuesta: { "qr": "data:image/png;base64,....." }
+`.trim();
+    navigator.clipboard.writeText(doc);
+    showToast('Documentación maestra copiada al portapapeles');
+  };
   if (!isAuthorized) {
     return (
       <div className="app-container" style={{display:'flex', alignItems:'center', justifyContent:'center', minHeight:'80vh'}}>
@@ -462,7 +556,13 @@ function App() {
             </div>
 
             <div className="glass-card" style={{border: '1px solid var(--brand-color)'}}>
-              <h2 style={{borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem', color:'var(--brand-color)'}}>🚀 Referencia APi & Webhooks</h2>
+              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem'}}>
+                <h2 style={{color:'var(--brand-color)', margin: 0}}>🚀 Referencia APi & Webhooks</h2>
+                <button className="btn btn-secondary" onClick={handleCopyDocumentation} style={{width: 'auto', fontSize: '0.8rem', padding: '0.5rem 1rem', display: 'flex', gap: '8px', alignItems: 'center'}}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  Copiar Todo
+                </button>
+              </div>
               <p style={{marginBottom: '1rem', fontSize: '0.85rem'}}>Documentación completa para construir tus integradores usando esta puerta de enlace. Selecciona un proceso:</p>
               
               <div style={{display: 'grid', gridTemplateColumns: '270px 1fr', gap: '1.5rem', marginTop: '1rem'}} className="api-section">
