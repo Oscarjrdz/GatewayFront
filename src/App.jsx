@@ -21,6 +21,7 @@ function App() {
 
   // List of all instances in Backend
   const [allInstances, setAllInstances] = useState([]);
+  const [apiTab, setApiTab] = useState('chat');
 
   useEffect(() => {
     // If we have an instance, poll the status every 4 seconds
@@ -417,33 +418,155 @@ function App() {
             </div>
 
             <div className="glass-card" style={{border: '1px solid var(--brand-color)'}}>
-              <h2 style={{borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem', color:'var(--brand-color)'}}>🚀 Código de Integración APi</h2>
-              <p style={{marginBottom: '1rem', fontSize: '0.85rem'}}>Usa este snippet de código en tus otros proyectos para conectar a este Gateway directamente enviando mensajes de texto. Copia y pega en tu servidor Node.js:</p>
+              <h2 style={{borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem', color:'var(--brand-color)'}}>🚀 Referencia APi & Webhooks</h2>
+              <p style={{marginBottom: '1rem', fontSize: '0.85rem'}}>Documentación completa para construir tus integradores usando esta puerta de enlace. Selecciona un proceso:</p>
               
-              <div style={{position: 'relative', background: '#0d1117', borderRadius: '8px', padding: '1.5rem', overflow: 'auto', border: '1px solid #30363d'}}>
-                <pre style={{margin: 0, color: '#e6edf3', fontSize: '0.8rem', lineHeight: '1.5', fontFamily: 'monospace'}}>
-{`const axios = require('axios');
+              <div style={{display: 'grid', gridTemplateColumns: '220px 1fr', gap: '1.5rem', marginTop: '1rem'}} className="api-section">
+                
+                {/* Menú Lateral Estilo Ultramsg */}
+                <div style={{background: 'rgba(0,0,0,0.2)', padding:'1rem', borderRadius: '12px'}}>
+                  <h4 style={{fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>Mensajes (Salientes)</h4>
+                  <div className="api-menu" style={{marginTop: 0, marginBottom: '1.5rem'}}>
+                    <div className="api-menu-item" onClick={() => setApiTab('chat')} style={{background: apiTab === 'chat' ? 'rgba(255,255,255,0.05)' : ''}}>
+                       <span className="api-badge post">POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>CHAT</span>
+                    </div>
+                    <div className="api-menu-item" onClick={() => setApiTab('image')} style={{background: apiTab === 'image' ? 'rgba(255,255,255,0.05)' : ''}}>
+                       <span className="api-badge post">POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>IMAGE</span>
+                    </div>
+                    <div className="api-menu-item" onClick={() => setApiTab('document')} style={{background: apiTab === 'document' ? 'rgba(255,255,255,0.05)' : ''}}>
+                       <span className="api-badge post">POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>DOCUMENT</span>
+                    </div>
+                  </div>
 
-const enviarWhatsApp = async (numeroDestino, mensaje) => {
-  try {
-    const response = await axios.post('${API_URL}/${instance.id}/messages/chat', {
-      token: '${instance.token}',
-      to: numeroDestino,
-      body: mensaje
-    });
-    console.log('Mensaje enviado!', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('Error enviando:', error.response?.data || error.message);
+                  <h4 style={{fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>Webhooks (Entrantes)</h4>
+                  <div className="api-menu" style={{marginTop: 0, marginBottom: '1.5rem'}}>
+                    <div className="api-menu-item" onClick={() => setApiTab('webhook_message')} style={{background: apiTab === 'webhook_message' ? 'rgba(255,255,255,0.05)' : ''}}>
+                       <span className="api-badge webhook">EVENT</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>RECIBIR MSJS</span>
+                    </div>
+                    <div className="api-menu-item" onClick={() => setApiTab('webhook_params')} style={{background: apiTab === 'webhook_params' ? 'rgba(255,255,255,0.05)' : ''}}>
+                       <span className="api-badge get" style={{background: '#d97706'}}>INFO</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>PARÁMETROS UTILES</span>
+                    </div>
+                  </div>
+
+                  <h4 style={{fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>Cuenta</h4>
+                  <div className="api-menu" style={{marginTop: 0}}>
+                    <div className="api-menu-item" onClick={() => setApiTab('status')} style={{background: apiTab === 'status' ? 'rgba(255,255,255,0.05)' : ''}}>
+                       <span className="api-badge get">GET</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>STATUS</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contenido / Code Snippets */}
+                <div>
+                  {apiTab === 'chat' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Enviar Chat (Texto o Emojis)</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Envía un mensaje usando el parámetro <code>body</code>. Los emojis son soportados de forma nativa enviando su código unicode en el texto.</p>
+                      <div className="api-code-panel">
+<pre>{`const axios = require('axios');
+
+const response = await axios.post('${API_URL}/${instance.id}/messages/chat', {
+  token: '${instance.token}',
+  to: '+528110000000',
+  body: '¡Hola! Qué tal este emoji? 🚀😍'
+});
+console.log(response.data);`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'image' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Enviar Imagen</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Envía gráficos pasando un link público en el parámetro <code>image</code> y un texto descriptivo opcional en <code>caption</code>.</p>
+                      <div className="api-code-panel">
+<pre>{`const response = await axios.post('${API_URL}/${instance.id}/messages/image', {
+  token: '${instance.token}',
+  to: '+528110000000',
+  image: 'https://ejemplo.com/fotoperfil.jpg',
+  caption: 'Este es el pie de foto 🔥'
+});`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'document' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Enviar Documento (PDF, Excel, Zip)</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Comparte un archivo con tus usuarios. Puedes forzar el nombre del archivo definiendo <code>filename</code>.</p>
+                      <div className="api-code-panel">
+<pre>{`const response = await axios.post('${API_URL}/${instance.id}/messages/document', {
+  token: '${instance.token}',
+  to: '+528110000000',
+  document: 'https://ejemplo.com/reporte.pdf',
+  filename: 'Reporte_Febrero.pdf'
+});`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'webhook_message' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Estructura de Entrada (Webhook POST)</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Cuando alguien te manda un mensaje, encendemos tú servidor con una petición POST. Este es el Payload (body) crudo en formato JSON que te va a llegar:</p>
+                      <div className="api-code-panel">
+<pre>{`// Lo que recibe tu Servidor cuando te escriben
+{
+  "event_type": "message_received",
+  "instanceId": "${instance.id}",
+  "data": {
+    "key": {
+      "remoteJid": "5218110000000@s.whatsapp.net",
+      "fromMe": false,
+      "id": "3EB0BC..." 
+    },
+    "pushName": "Oscar 🚀", // Nombre público del remitente
+    "message": {
+      "conversation": "Deseo pedir pizza 🍕" // Mensaje y emojis
+    },
+    "messageTimestamp": 1679091234
   }
-};
+}`}</pre>
+                      </div>
+                    </>
+                  )}
 
-// Uso:
-enviarWhatsApp('+528110000000', '¡Hola desde mi otro sistema!');`}
-                </pre>
+                  {apiTab === 'webhook_params' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Directorio de Parámetros Útiles (Extracción)</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Si le vas a pedir a ChatGPT o a Antigravity que lea un mensaje de tu Gateway, diles que busquen estas variables en el Payload Webhook:</p>
+                      <ul style={{fontSize:'0.85rem', paddingLeft: '1.25rem', lineHeight:'1.8', color:'var(--text-secondary)'}}>
+                        <li><strong style={{color:'white'}}>Texto o Emojis del mensaje:</strong> <code>data.message.conversation</code> o <code>data.message.extendedTextMessage.text</code>.</li>
+                        <li><strong style={{color:'white'}}>Número Ajeno entrante:</strong> <code>data.key.remoteJid</code> -&gt; (Remueve todo después de la arroba para tener el número limpio).</li>
+                        <li><strong style={{color:'white'}}>Filtro Anti-Salientes:</strong> Ignora los hooks que tengan <code>data.key.fromMe = true</code> para que tu bot no se responda a sí mismo por accidente.</li>
+                        <li><strong style={{color:'white'}}>Nombre del Cliente:</strong> <code>data.pushName</code> (Lo que puso el usuario en su biografía de la app de WhatsApp).</li>
+                      </ul>
+                    </>
+                  )}
+                  
+                  {apiTab === 'status' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Consultar Estado y Métricas</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Obtén los contadores totales y el estado actual (conectado o desconectado).</p>
+                      <div className="api-code-panel">
+<pre>{`const response = await axios.get('${API_URL}/${instance.id}/status?token=${instance.token}');
+
+// Resultado:
+{
+  "instanceId": "${instance.id}",
+  "status": "authenticated", // "qr", "loading", "disconnected"
+  "webhook_url": "https://...",
+  "messages_sent": 142,
+  "messages_received": 1058
+}`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                </div>
               </div>
-              <p style={{marginTop: '1rem', fontSize: '0.85rem'}}>Para imágenes usa la ruta <code>/messages/image</code> con el parámetro <code>image: "url"</code> en lugar de <code>body</code>.</p>
             </div>
+
           </div>
         </div>
       )}
