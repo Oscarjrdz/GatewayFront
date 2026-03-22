@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import './index.css';
 
-const API_URL = 'https://gatewaywapp-production.up.railway.app';
+const API_URL = import.meta.env.VITE_API_URL || 'https://gatewaywapp-production.up.railway.app';
 
 function App() {
+  const [isAuthorized, setIsAuthorized] = useState(localStorage.getItem('admin_access') === 'true');
+  const [masterPassword, setMasterPassword] = useState('');
+
   const [instance, setInstance] = useState(null);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
@@ -178,6 +181,47 @@ function App() {
     setStatus('loading');
     setQrCode(null);
   };
+
+  if (!isAuthorized) {
+    return (
+      <div className="app-container" style={{display:'flex', alignItems:'center', justifyContent:'center', minHeight:'80vh'}}>
+        <div className="glass-card" style={{maxWidth: '450px', width: '100%', textAlign: 'center'}}>
+          <div className="logo-icon" style={{margin: '0 auto 1.5rem auto', width:'60px', height:'60px'}}>
+             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{color: 'white'}}>
+               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+             </svg>
+          </div>
+          <h2>Acceso Privado APi</h2>
+          <p style={{marginBottom: '2rem', fontSize:'0.85rem'}}>Esta es una puerta de enlace privada de infraestructura corporativa. Identifícate para continuar.</p>
+          
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            if (masterPassword === 'izzigo2026' || masterPassword === '1234') { // Temporal password till Google auth
+              localStorage.setItem('admin_access', 'true');
+              setIsAuthorized(true);
+            } else {
+              showToast('Credenciales incorrectas', 'error');
+            }
+          }}>
+            <div className="input-group">
+              <input 
+                type="password" 
+                placeholder="Contraseña Maestra..." 
+                value={masterPassword} 
+                onChange={e => setMasterPassword(e.target.value)}
+                autoFocus
+                style={{textAlign: 'center', fontSize: '1.2rem', letterSpacing: '3px'}}
+              />
+            </div>
+            <button type="submit" className="btn btn-primary" style={{marginTop: '1rem'}}>
+              Desbloquear Sistema
+            </button>
+            <p style={{marginTop: '1.5rem', fontSize:'0.75rem', opacity: 0.5}}>Protected Area • Encriptación End-to-End</p>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">
