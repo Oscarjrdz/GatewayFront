@@ -284,7 +284,7 @@ function App() {
             </div>
           </div>
 
-          <div className="glass-card" style={{maxWidth: '900px', margin: '0 auto', width: '100%'}}>
+          <div className="glass-card" style={{margin: '0 auto', width: '100%'}}>
             <h2 style={{borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1rem'}}>Tus Instancias Activas (Master Dashboard)</h2>
             {allInstances.length === 0 ? (
               <p>No se han encontrado instancias en tu servidor de Railway.</p>
