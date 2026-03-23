@@ -78,7 +78,12 @@ function App() {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       
-      setInstance({ id: inputId, token: inputToken });
+      setInstance({ 
+        id: inputId, 
+        token: inputToken, 
+        messages_sent: data.messages_sent || 0,
+        messages_received: data.messages_received || 0
+      });
       setStatus(data.status);
       showToast('Acceso correcto');
     } catch (error) {
@@ -93,6 +98,12 @@ function App() {
       const res = await fetch(`${API_URL}/${instance.id}/status?token=${instance.token}`);
       const data = await res.json();
       setStatus(data.status);
+      
+      setInstance(prev => ({
+        ...prev,
+        messages_sent: data.messages_sent || 0,
+        messages_received: data.messages_received || 0
+      }));
 
       if (data.status === 'qr') {
         fetchQr();
