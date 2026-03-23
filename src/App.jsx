@@ -246,7 +246,18 @@ POST /:instanceId/messages/sticker
   "sticker": "https://url.com/sticker.webp" // URL o base64
 }
 
-6. CONTROL DE PRESENCIA (Escribiendo/Grabando)
+6. ENVIAR UBICACION (Map Location)
+POST /:instanceId/messages/location
+{
+  "token": "TU_TOKEN",
+  "to": "528110000000@c.us",
+  "lat": 25.6866,
+  "lng": -100.3161,
+  "name": "Sucursal Centro", // Opcional
+  "address": "Av. Morelos" // Opcional
+}
+
+7. CONTROL DE PRESENCIA (Escribiendo/Grabando)
 POST /:instanceId/presence
 {
   "token": "TU_TOKEN",
@@ -254,7 +265,7 @@ POST /:instanceId/presence
   "status": "composing" // available | composing | recording | paused
 }
 
-7. CONFIRMAR LECTURA (Palomitas Azules)
+8. CONFIRMAR LECTURA (Palomitas Azules)
 POST /:instanceId/messages/read
 {
   "token": "TU_TOKEN",
@@ -262,7 +273,7 @@ POST /:instanceId/messages/read
   "messageId": "3EB0BC..."
 }
 
-8. PUBLICAR ESTADO (Story)
+9. PUBLICAR ESTADO (Story)
 POST /:instanceId/stories
 {
   "token": "TU_TOKEN",
@@ -622,6 +633,9 @@ Respuesta: { "qr": "data:image/png;base64,....." }
                     <div className="api-menu-item" onClick={() => setApiTab('sticker')} style={{background: apiTab === 'sticker' ? 'rgba(255,255,255,0.05)' : ''}}>
                        <span className="api-badge post">POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>STICKER</span>
                     </div>
+                    <div className="api-menu-item" onClick={() => setApiTab('location')} style={{background: apiTab === 'location' ? 'rgba(255,255,255,0.05)' : ''}}>
+                       <span className="api-badge post">POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>LOCATION</span>
+                    </div>
                     <div className="api-menu-item" onClick={() => setApiTab('presence')} style={{background: apiTab === 'presence' ? 'rgba(255,255,255,0.05)' : ''}}>
                        <span className="api-badge post" style={{background: '#d97706'}}>POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>PRESENCIA</span>
                     </div>
@@ -686,6 +700,23 @@ Respuesta: { "qr": "data:image/png;base64,....." }
   token: '${instance.token}',
   to: '528110000000@c.us',
   sticker: 'https://ejemplo.com/sticker.webp'
+});`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'location' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Enviar Ubicación (GPS)</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Envía un mapa interactivo con un PIN de latitud y longitud. Opcionalmente puedes agregar nombre y dirección (address) del lugar.</p>
+                      <div className="api-code-panel">
+<pre>{`const response = await axios.post('${API_URL}/${instance.id}/messages/location', {
+  token: '${instance.token}',
+  to: '528110000000@c.us',
+  lat: 25.6866,
+  lng: -100.3161,
+  name: 'Macroplaza', // Opcional
+  address: 'Monterrey, N.L.' // Opcional
 });`}</pre>
                       </div>
                     </>
