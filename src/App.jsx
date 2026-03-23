@@ -238,7 +238,15 @@ POST /:instanceId/messages/audio
   "ptt": true // True transforma a Nota de Voz nativa
 }
 
-5. CONTROL DE PRESENCIA (Escribiendo/Grabando)
+5. ENVIAR STICKER
+POST /:instanceId/messages/sticker
+{
+  "token": "TU_TOKEN",
+  "to": "528110000000@c.us",
+  "sticker": "https://url.com/sticker.webp" // URL o base64
+}
+
+6. CONTROL DE PRESENCIA (Escribiendo/Grabando)
 POST /:instanceId/presence
 {
   "token": "TU_TOKEN",
@@ -246,7 +254,7 @@ POST /:instanceId/presence
   "status": "composing" // available | composing | recording | paused
 }
 
-6. CONFIRMAR LECTURA (Palomitas Azules)
+7. CONFIRMAR LECTURA (Palomitas Azules)
 POST /:instanceId/messages/read
 {
   "token": "TU_TOKEN",
@@ -254,7 +262,7 @@ POST /:instanceId/messages/read
   "messageId": "3EB0BC..."
 }
 
-7. PUBLICAR ESTADO (Story)
+8. PUBLICAR ESTADO (Story)
 POST /:instanceId/stories
 {
   "token": "TU_TOKEN",
@@ -611,6 +619,9 @@ Respuesta: { "qr": "data:image/png;base64,....." }
                     <div className="api-menu-item" onClick={() => setApiTab('audio')} style={{background: apiTab === 'audio' ? 'rgba(255,255,255,0.05)' : ''}}>
                        <span className="api-badge post">POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>AUDIO</span>
                     </div>
+                    <div className="api-menu-item" onClick={() => setApiTab('sticker')} style={{background: apiTab === 'sticker' ? 'rgba(255,255,255,0.05)' : ''}}>
+                       <span className="api-badge post">POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>STICKER</span>
+                    </div>
                     <div className="api-menu-item" onClick={() => setApiTab('presence')} style={{background: apiTab === 'presence' ? 'rgba(255,255,255,0.05)' : ''}}>
                        <span className="api-badge post" style={{background: '#d97706'}}>POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>PRESENCIA</span>
                     </div>
@@ -661,6 +672,20 @@ Respuesta: { "qr": "data:image/png;base64,....." }
   to: '528110000000@c.us',
   audio: 'https://ejemplo.com/bienvenida.mp3',
   ptt: true
+});`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'sticker' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Enviar Sticker</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Envía un sticker pasando una URL pública apuntando a un archivo <code>.webp</code> o bien, el contenido del <code>.webp</code> codificado en base64 en la propiedad <code>sticker</code>.</p>
+                      <div className="api-code-panel">
+<pre>{`const response = await axios.post('${API_URL}/${instance.id}/messages/sticker', {
+  token: '${instance.token}',
+  to: '528110000000@c.us',
+  sticker: 'https://ejemplo.com/sticker.webp'
 });`}</pre>
                       </div>
                     </>
