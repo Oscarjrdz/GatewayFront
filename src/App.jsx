@@ -207,7 +207,7 @@ Token: ${instance?.token || 'abc123token'}
 POST /:instanceId/messages/chat
 {
   "token": "TU_TOKEN",
-  "to": "+528110000000",
+  "to": "528110000000@c.us",
   "body": "¡Hola Mundo! 🚀"
 }
 
@@ -215,7 +215,7 @@ POST /:instanceId/messages/chat
 POST /:instanceId/messages/image
 {
   "token": "TU_TOKEN",
-  "to": "+528110000000",
+  "to": "528110000000@c.us",
   "image": "https://url.com/foto.jpg",
   "caption": "Pie de foto opcional"
 }
@@ -224,7 +224,7 @@ POST /:instanceId/messages/image
 POST /:instanceId/messages/document
 {
   "token": "TU_TOKEN",
-  "to": "+528110000000",
+  "to": "528110000000@c.us",
   "document": "https://url.com/reporte.pdf",
   "filename": "Reporte.pdf"
 }
@@ -233,7 +233,7 @@ POST /:instanceId/messages/document
 POST /:instanceId/messages/audio
 {
   "token": "TU_TOKEN",
-  "to": "+528110000000",
+  "to": "528110000000@c.us",
   "audio": "https://url.com/audio.mp3",
   "ptt": true // True transforma a Nota de Voz nativa
 }
@@ -242,8 +242,25 @@ POST /:instanceId/messages/audio
 POST /:instanceId/presence
 {
   "token": "TU_TOKEN",
-  "to": "+528110000000",
+  "to": "528110000000@c.us",
   "status": "composing" // available | composing | recording | paused
+}
+
+6. CONFIRMAR LECTURA (Palomitas Azules)
+POST /:instanceId/messages/read
+{
+  "token": "TU_TOKEN",
+  "to": "528110000000@c.us",
+  "messageId": "3EB0BC..."
+}
+
+7. PUBLICAR ESTADO (Story)
+POST /:instanceId/stories
+{
+  "token": "TU_TOKEN",
+  "type": "text", // "text", "image", "video"
+  "text": "Promo de Pizzas hoy 🍕", // Si es texto
+  "color": "#FF5733" // Opcional, color fondo
 }
 
 === WEBHOOKS PARAMS (ENTRANTES) ===
@@ -597,6 +614,12 @@ Respuesta: { "qr": "data:image/png;base64,....." }
                     <div className="api-menu-item" onClick={() => setApiTab('presence')} style={{background: apiTab === 'presence' ? 'rgba(255,255,255,0.05)' : ''}}>
                        <span className="api-badge post" style={{background: '#d97706'}}>POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>PRESENCIA</span>
                     </div>
+                    <div className="api-menu-item" onClick={() => setApiTab('read')} style={{background: apiTab === 'read' ? 'rgba(255,255,255,0.05)' : ''}}>
+                       <span className="api-badge post" style={{background: '#1d4ed8'}}>POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>LEER (AZULES)</span>
+                    </div>
+                    <div className="api-menu-item" onClick={() => setApiTab('story')} style={{background: apiTab === 'story' ? 'rgba(255,255,255,0.05)' : ''}}>
+                       <span className="api-badge post" style={{background: '#db2777'}}>POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>STORY (ESTADO)</span>
+                    </div>
                   </div>
 
                   <h4 style={{fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>Webhooks (Entrantes)</h4>
@@ -657,6 +680,38 @@ const response = await axios.post('${API_URL}/${instance.id}/presence', {
                       </div>
                     </>
                   )}
+                  {apiTab === 'read' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Confirmar Lectura (Palomitas Azules)</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Envía una señal lógica al remitente para que sus palomitas se pinten de azul indicando que tu servidor procesó con éxito su webhook. Usa el id original del mensaje recibido.</p>
+                      <div className="api-code-panel">
+<pre>{`// Encender Palomitas Azules
+const response = await axios.post('${API_URL}/${instance.id}/messages/read', {
+  token: '${instance.token}',
+  to: '528110000000@c.us',
+  messageId: '3EB0BC...' // ID extraído del Webhook Payload entrante
+});`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'story' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Publicar WhatsApp Status (Stories)</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Soporta Texto con color de fondo dinámico, Fotografías o Videos cortos. Opcionalmente puedes mandar el Array <code>contacts</code> para restringir quién lo puede ver, sino será público.</p>
+                      <div className="api-code-panel">
+<pre>{`// Publicar una Historia / Estado
+const response = await axios.post('${API_URL}/${instance.id}/stories', {
+  token: '${instance.token}',
+  type: 'text', // Opciones: 'text', 'image', 'video'
+  text: '¡Llegaron las nuevas pizzas!🍕',
+  color: '#FF5733', // (Opcional) Fondo en Hexadecimal
+  font: 1 // (Opcional) Tipografía del 0 al 4
+});`}</pre>
+                      </div>
+                    </>
+                  )}
+
                   {apiTab === 'profile_pic' && (
                     <>
                       <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Obtener Foto de Perfil WhatsApp</h3>
