@@ -624,7 +624,7 @@ Respuesta: { "qr": "data:image/png;base64,....." }
                       <div className="api-code-panel">
 <pre>{`const response = await axios.post('${API_URL}/${instance.id}/messages/audio', {
   token: '${instance.token}',
-  to: '+528110000000',
+  to: '528110000000@c.us',
   audio: 'https://ejemplo.com/bienvenida.mp3',
   ptt: true
 });`}</pre>
@@ -640,7 +640,7 @@ Respuesta: { "qr": "data:image/png;base64,....." }
 <pre>{`// Mostrar "Escribiendo..." en el chat del usuario
 const response = await axios.post('${API_URL}/${instance.id}/presence', {
   token: '${instance.token}',
-  to: '+528110000000',
+  to: '528110000000@c.us',
   status: 'composing' // opciones: 'available', 'composing', 'recording', 'paused'
 });`}</pre>
                       </div>
@@ -652,12 +652,11 @@ const response = await axios.post('${API_URL}/${instance.id}/presence', {
                       <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Extrae la URL de la foto de perfil en alta resolución de cualquier número de WhatsApp en el mundo pasando el parámetro <code>to</code>.</p>
                       <div className="api-code-panel">
 <pre>{`const response = await axios.get(
-  '${API_URL}/${instance.id}/contacts/profile-picture?token=${instance.token}&to=+528110000000'
+  '${API_URL}/${instance.id}/contacts/profile-picture?token=${instance.token}&to=528110000000@c.us'
 );
 
 // Resultado: Link estático directo al avatar de la persona
 {
-  "jid": "5218110000000@s.whatsapp.net",
   "profile_picture": "https://pps.whatsapp.net/v/t61.24694-24/302..."
 }`}</pre>
                       </div>
@@ -706,7 +705,7 @@ const response = await axios.post('${API_URL}/instances');
 
 const response = await axios.post('${API_URL}/${instance.id}/messages/chat', {
   token: '${instance.token}',
-  to: '+528110000000',
+  to: '528110000000@c.us',
   body: '¡Hola! Qué tal este emoji? 🚀😍'
 });
 console.log(response.data);`}</pre>
@@ -721,7 +720,7 @@ console.log(response.data);`}</pre>
                       <div className="api-code-panel">
 <pre>{`const response = await axios.post('${API_URL}/${instance.id}/messages/image', {
   token: '${instance.token}',
-  to: '+528110000000',
+  to: '528110000000@c.us',
   image: 'https://ejemplo.com/fotoperfil.jpg',
   caption: 'Este es el pie de foto 🔥'
 });`}</pre>
@@ -736,7 +735,7 @@ console.log(response.data);`}</pre>
                       <div className="api-code-panel">
 <pre>{`const response = await axios.post('${API_URL}/${instance.id}/messages/document', {
   token: '${instance.token}',
-  to: '+528110000000',
+  to: '528110000000@c.us',
   document: 'https://ejemplo.com/reporte.pdf',
   filename: 'Reporte_Febrero.pdf'
 });`}</pre>
@@ -754,16 +753,15 @@ console.log(response.data);`}</pre>
   "event_type": "message_received",
   "instanceId": "${instance.id}",
   "data": {
-    "key": {
-      "remoteJid": "5218110000000@s.whatsapp.net",
-      "fromMe": false,
-      "id": "3EB0BC..." 
-    },
-    "pushName": "Oscar 🚀", // Nombre público del remitente
-    "message": {
-      "conversation": "Deseo pedir pizza 🍕" // Mensaje y emojis
-    },
-    "messageTimestamp": 1679091234
+    "id": "3EB0BC...",
+    "from": "5218110000000@c.us",
+    "to": "BOT_NUMBER@c.us",
+    "pushName": "Oscar 🚀",
+    "body": "Deseo pedir pizza 🍕",
+    "type": "chat",
+    "fromMe": false,
+    "timestamp": 1679091234,
+    "__raw": { ... } // Metadatos profundos de Baileys
   }
 }`}</pre>
                       </div>
@@ -775,10 +773,11 @@ console.log(response.data);`}</pre>
                       <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Directorio de Parámetros Útiles (Extracción)</h3>
                       <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Si le vas a pedir a ChatGPT o a Antigravity que lea un mensaje de tu Gateway, diles que busquen estas variables en el Payload Webhook:</p>
                       <ul style={{fontSize:'0.85rem', paddingLeft: '1.25rem', lineHeight:'1.8', color:'var(--text-secondary)'}}>
-                        <li><strong style={{color:'white'}}>Texto o Emojis del mensaje:</strong> <code>data.message.conversation</code> o <code>data.message.extendedTextMessage.text</code>.</li>
-                        <li><strong style={{color:'white'}}>Número Ajeno entrante:</strong> <code>data.key.remoteJid</code> -&gt; (Remueve todo después de la arroba para tener el número limpio).</li>
-                        <li><strong style={{color:'white'}}>Filtro Anti-Salientes:</strong> Ignora los hooks que tengan <code>data.key.fromMe = true</code> para que tu bot no se responda a sí mismo por accidente.</li>
-                        <li><strong style={{color:'white'}}>Nombre del Cliente:</strong> <code>data.pushName</code> (Lo que puso el usuario en su biografía de la app de WhatsApp).</li>
+                        <li><strong style={{color:'white'}}>Texto o Emojis del mensaje:</strong> <code>data.body</code> (Texto plano ya extraído).</li>
+                        <li><strong style={{color:'white'}}>Número Ajeno entrante:</strong> <code>data.from</code> (Sufijo estándar en modo @c.us).</li>
+                        <li><strong style={{color:'white'}}>Filtro Anti-Salientes:</strong> Analiza si <code>data.fromMe = true</code> para ignorar si tu bot se responde a sí mismo.</li>
+                        <li><strong style={{color:'white'}}>Nombre del Cliente:</strong> <code>data.pushName</code> (Lo que puso el usuario en su biografía de WhatsApp).</li>
+                        <li><strong style={{color:'white'}}>Tipo de medio:</strong> <code>data.type</code> (chat, image, document, audio, video).</li>
                       </ul>
                     </>
                   )}
