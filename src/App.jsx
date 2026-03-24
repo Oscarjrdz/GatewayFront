@@ -104,11 +104,11 @@ function App() {
       const data = await res.json();
       setStatus(data.status);
       
-      setInstance(prev => ({
+      setInstance(prev => prev ? ({
         ...prev,
         messages_sent: data.messages_sent || 0,
         messages_received: data.messages_received || 0
-      }));
+      }) : null);
 
       if (data.status === 'qr') {
         fetchQr();
