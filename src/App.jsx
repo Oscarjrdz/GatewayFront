@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './index.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://gatewaywapp-production.up.railway.app';
@@ -25,6 +25,8 @@ function App() {
   // List of all instances in Backend
   const [allInstances, setAllInstances] = useState([]);
   const [apiTab, setApiTab] = useState('chat');
+  
+  const prevStatusRef = useRef('loading');
 
   useEffect(() => {
     // If we have an instance, poll the status every 4 seconds
@@ -82,7 +84,8 @@ function App() {
         id: inputId, 
         token: inputToken, 
         messages_sent: data.messages_sent || 0,
-        messages_received: data.messages_received || 0
+        messages_received: data.messages_received || 0,
+        instance_name: data.instance_name || ''
       });
       setStatus(data.status);
       showToast('Acceso correcto');
@@ -102,7 +105,8 @@ function App() {
       setInstance(prev => ({
         ...prev,
         messages_sent: data.messages_sent || 0,
-        messages_received: data.messages_received || 0
+        messages_received: data.messages_received || 0,
+        instance_name: data.instance_name !== undefined ? data.instance_name : prev.instance_name
       }));
 
       if (data.status === 'qr') {
@@ -111,9 +115,10 @@ function App() {
         setQrCode(null);
       }
 
-      if (data.status === 'disconnected') {
+      if (data.status === 'disconnected' && prevStatusRef.current !== 'disconnected') {
         showToast('Instancia desconectada', 'warning');
       }
+      prevStatusRef.current = data.status;
     } catch (e) {
       console.error(e);
     }
@@ -162,7 +167,8 @@ function App() {
         body: JSON.stringify({
           token: instance.token,
           webhook_url: instance.webhook_url || '',
-          webhook_message_received: instance.webhook_message_received || false
+          webhook_message_received: instance.webhook_message_received || false,
+          instance_name: instance.instance_name || ''
         })
       });
       const data = await res.json();
@@ -438,10 +444,15 @@ Respuesta: { "qr": "data:image/png;base64,....." }
                       showToast('Credenciales autollenadas. Haz click en Ingresar');
                   }}>
                     <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '0.5rem', gap: '0.5rem'}}>
-                      <strong style={{color: 'var(--brand-color)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}} title={inst.instance_id}>{inst.instance_id}</strong>
+                      <strong style={{color: 'var(--brand-color)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '1.05rem'}} title={inst.instance_name || inst.instance_id}>
+                        {inst.instance_name || inst.instance_id}
+                      </strong>
                       <span className="status-badge" style={{fontSize: '0.6rem', padding: '4px 8px', background: inst.status === 'authenticated' ? 'var(--success)' : 'var(--error)', color: 'white', borderRadius: '4px', whiteSpace: 'nowrap'}}>{inst.status}</span>
                     </div>
-                    <code style={{fontSize: '0.75rem', marginBottom: '0.5rem'}}>Token: {inst.token.substring(0,8)}...</code>
+                    {inst.instance_name && (
+                      <code style={{fontSize: '0.7rem', color: 'gray', marginBottom: '0.25rem', display: 'block'}}>ID: {inst.instance_id}</code>
+                    )}
+                    <code style={{fontSize: '0.75rem', marginBottom: '0.5rem', display: 'block'}}>Token: {inst.token.substring(0,8)}...</code>
                     <div style={{display: 'flex', gap: '0.5rem', fontSize: '0.75rem', color: 'gray'}}>
                       <span>📤 {inst.messages_sent || 0}</span>
                       <span>📥 {inst.messages_received || 0}</span>
@@ -482,6 +493,12 @@ Respuesta: { "qr": "data:image/png;base64,....." }
             <div style={{marginBottom: '2rem'}}>
               <h3 style={{fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '1rem', letterSpacing: '1px'}}>Tus Credenciales APi</h3>
               
+              {instance.instance_name && (
+                <div style={{color: 'var(--brand-color)', fontWeight: 'bold', marginBottom: '0.5rem'}}>
+                  {instance.instance_name}
+                </div>
+              )}
+
               <div className="copy-field">
                 <code title={instance.id}>{instance.id}</code>
                 <button 
@@ -574,8 +591,18 @@ Respuesta: { "qr": "data:image/png;base64,....." }
             </div>
 
             <div className="glass-card">
-              <h2 style={{borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem'}}>Configuración Webhook</h2>
+              <h2 style={{borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem'}}>Ajustes de la Instancia</h2>
               
+              <div className="input-group">
+                <label>Nombre de la Instancia (Opcional)</label>
+                <input 
+                  type="text" 
+                  placeholder="ej. Soporte Tienda Principal" 
+                  value={instance?.instance_name || ''} 
+                  onChange={e => setInstance({...instance, instance_name: e.target.value})}
+                />
+              </div>
+
               <div className="input-group">
                 <label>Webhook URL (para recibir eventos POST desde WhatsApp)</label>
                 <input 
