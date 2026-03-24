@@ -85,6 +85,8 @@ function App() {
         token: inputToken, 
         messages_sent: data.messages_sent || 0,
         messages_received: data.messages_received || 0,
+        webhook_url: data.webhook_url || '',
+        webhook_message_received: data.webhook_message_received || false,
         instance_name: data.instance_name || ''
       });
       setStatus(data.status);
@@ -106,6 +108,8 @@ function App() {
         ...prev,
         messages_sent: data.messages_sent || 0,
         messages_received: data.messages_received || 0,
+        webhook_url: data.webhook_url !== undefined ? data.webhook_url : prev.webhook_url,
+        webhook_message_received: data.webhook_message_received !== undefined ? data.webhook_message_received : prev.webhook_message_received,
         instance_name: data.instance_name !== undefined ? data.instance_name : prev.instance_name
       }));
 
@@ -197,6 +201,8 @@ function App() {
     setInstance(null);
     setStatus('loading');
     setQrCode(null);
+    setInputId('');
+    setInputToken('');
   };
 
   const handleCopyDocumentation = () => {
