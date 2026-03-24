@@ -408,7 +408,7 @@ Respuesta: { "qr": "data:image/png;base64,....." }
             <div className="glass-card">
               <h2>Acceder a mi APi existente</h2>
               <p style={{marginBottom: '1.5rem'}}>Ingresa con tus credenciales de Gateway previamente generadas.</p>
-              <form onSubmit={handleLogin}>
+              <form onSubmit={handleLogin} autoComplete="off">
                 <div className="input-group">
                   <label>Instance ID</label>
                   <input 
@@ -416,6 +416,9 @@ Respuesta: { "qr": "data:image/png;base64,....." }
                     placeholder="ej. instance123456" 
                     value={inputId} 
                     onChange={e => setInputId(e.target.value)}
+                    autoComplete="off"
+                    data-lpignore="true"
+                    data-form-type="other"
                   />
                 </div>
                 <div className="input-group">
@@ -425,6 +428,9 @@ Respuesta: { "qr": "data:image/png;base64,....." }
                     placeholder="*****************" 
                     value={inputToken} 
                     onChange={e => setInputToken(e.target.value)}
+                    autoComplete="new-password"
+                    data-lpignore="true"
+                    data-form-type="other"
                   />
                 </div>
                 <button type="submit" className="btn btn-secondary" disabled={loading}>
