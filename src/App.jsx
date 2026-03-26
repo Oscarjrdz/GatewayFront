@@ -668,8 +668,9 @@ POST /:instanceId/groups/:groupId/settings
 
           {/* Main Area */}
           <div style={{display: 'flex', flexDirection: 'column', gap: '2rem'}}>
-            <div className="glass-card">
-              <h2 style={{borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem'}}>Petición APi de Prueba</h2>
+            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', alignItems: 'start'}} className="cards-grid-half">
+              <div className="glass-card">
+                <h2 style={{borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem'}}>Petición APi de Prueba</h2>
               
               <form onSubmit={handleSendMessage}>
                 <div className="input-group">
@@ -713,8 +714,8 @@ POST /:instanceId/groups/:groupId/settings
               </form>
             </div>
 
-            <div className="glass-card">
-              <h2 style={{borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem'}}>Ajustes de la Instancia</h2>
+              <div className="glass-card">
+                <h2 style={{borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem'}}>Ajustes de la Instancia</h2>
               
               <div className="input-group">
                 <label>Nombre de la Instancia (Opcional)</label>
@@ -750,6 +751,7 @@ POST /:instanceId/groups/:groupId/settings
               </div>
 
               <button className="btn btn-secondary" onClick={saveWebhook} style={{maxWidth: '200px'}}>Guardar Ajustes</button>
+            </div>
             </div>
 
             <div className="glass-card" style={{border: '1px solid var(--brand-color)'}}>

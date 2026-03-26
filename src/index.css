@@ -128,8 +128,8 @@ header {
 }
 
 @media (max-width: 768px) {
-  .dashboard-grid, .auth-grid {
-    grid-template-columns: 1fr;
+  .dashboard-grid, .auth-grid, .cards-grid-half {
+    grid-template-columns: 1fr !important;
   }
 }
 
