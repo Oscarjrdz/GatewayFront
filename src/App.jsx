@@ -282,13 +282,32 @@ POST /:instanceId/messages/read
   "messageId": "3EB0BC..."
 }
 
-9. PUBLICAR ESTADO (Story)
+9. PUBLICAR ESTADO de WhatsApp (Story)
 POST /:instanceId/stories
+
+// Tipo TEXTO:
 {
   "token": "TU_TOKEN",
-  "type": "text", // "text", "image", "video"
-  "text": "Promo de Pizzas hoy 🍕", // Si es texto
-  "color": "#FF5733" // Opcional, color fondo
+  "type": "text",
+  "text": "¡Promo de Pizzas hoy! 🍕",
+  "color": "#6C63FF", // Opcional, color de fondo hex
+  "font": 1          // Opcional, tipografía del 0 al 4
+}
+
+// Tipo IMAGEN:
+{
+  "token": "TU_TOKEN",
+  "type": "image",
+  "image": "https://url.com/promo.jpg", // URL o base64
+  "caption": "Pie de foto opcional"
+}
+
+// Tipo VIDEO:
+{
+  "token": "TU_TOKEN",
+  "type": "video",
+  "video": "https://url.com/clip.mp4", // URL o base64
+  "caption": "Descripción del video"
 }
 
 === WEBHOOKS PARAMS (ENTRANTES) ===
@@ -328,6 +347,101 @@ Respuesta: { "status": "authenticated", "messages_sent": 142, "messages_received
 4. CODIGO QR BASE 64 (GET)
 GET /:instanceId/qr?token=TU_TOKEN
 Respuesta: { "qr": "data:image/png;base64,....." }
+
+=== CANALES DE WHATSAPP (NEWSLETTER) ===
+
+1. CREAR CANAL
+POST /:instanceId/channels
+{
+  "token": "TU_TOKEN",
+  "name": "Mi Canal de Noticias",
+  "description": "Descripción opcional"
+}
+Respuesta: { "success": true, "channel": { "id": "120363xxx@newsletter", "invite": "https://whatsapp.com/channel/..." } }
+
+2. ENVIAR MENSAJE AL CANAL
+POST /:instanceId/channels/:channelId/messages
+{
+  "token": "TU_TOKEN",
+  "type": "text",    // "text", "image", "video"
+  "text": "¡Bienvenidos! 🚀"
+}
+
+3. ACTUALIZAR CANAL (nombre / descripción / foto)
+PATCH /:instanceId/channels/:channelId
+{
+  "token": "TU_TOKEN",
+  "name": "Nuevo Nombre",
+  "description": "Nueva descripción",
+  "picture": "https://url.com/logo.jpg"
+}
+
+4. OBTENER METADATA DEL CANAL
+GET /:instanceId/channels/:channelId?token=TU_TOKEN
+
+5. SEGUIR UN CANAL
+POST /:instanceId/channels/:channelId/follow
+{ "token": "TU_TOKEN" }
+
+6. DEJAR DE SEGUIR UN CANAL
+POST /:instanceId/channels/:channelId/unfollow
+{ "token": "TU_TOKEN" }
+
+7. ELIMINAR CANAL (solo propietario)
+DELETE /:instanceId/channels/:channelId?token=TU_TOKEN
+
+=== GRUPOS DE WHATSAPP ===
+
+1. CREAR GRUPO
+POST /:instanceId/groups
+{
+  "token": "TU_TOKEN",
+  "name": "Equipo de Ventas Q1",
+  "participants": ["528110000001@c.us", "528110000002@c.us"]
+}
+Respuesta: { "group": { "id": "120363xxx@g.us", ... } }
+
+2. LISTAR TODOS MIS GRUPOS (GET)
+GET /:instanceId/groups?token=TU_TOKEN
+
+3. INFO DE UN GRUPO (GET)
+GET /:instanceId/groups/:groupId?token=TU_TOKEN
+
+4. GESTIONAR PARTICIPANTES
+POST /:instanceId/groups/:groupId/participants
+{
+  "token": "TU_TOKEN",
+  "action": "add",  // "add" | "remove" | "promote" | "demote"
+  "participants": ["528110000003@c.us"]
+}
+
+5. EDITAR NOMBRE / DESCRIPCIÓN / FOTO
+PATCH /:instanceId/groups/:groupId
+{
+  "token": "TU_TOKEN",
+  "name": "Nuevo Nombre",
+  "description": "Nueva descripción",
+  "picture": "https://url.com/foto.jpg"
+}
+
+6. OBTENER LINK DE INVITACIÓN (GET)
+GET /:instanceId/groups/:groupId/invite?token=TU_TOKEN
+Respuesta: { "invite_link": "https://chat.whatsapp.com/XXXX" }
+
+7. UNIRSE A GRUPO POR CÓDIGO
+POST /:instanceId/groups/join
+{ "token": "TU_TOKEN", "code": "XXXXXX" }
+
+8. SALIR DEL GRUPO
+POST /:instanceId/groups/:groupId/leave
+{ "token": "TU_TOKEN" }
+
+9. CONFIGURACIÓN DEL GRUPO
+POST /:instanceId/groups/:groupId/settings
+{
+  "token": "TU_TOKEN",
+  "setting": "announcement"  // "announcement" | "not_announcement" | "locked" | "unlocked"
+}
 `.trim();
     navigator.clipboard.writeText(doc);
     showToast('Documentación maestra copiada al portapapeles');
@@ -683,6 +797,32 @@ Respuesta: { "qr": "data:image/png;base64,....." }
                     </div>
                   </div>
 
+                  <h4 style={{fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>Canales (Newsletter)</h4>
+                  <div className="api-menu" style={{marginTop: 0, marginBottom: '1.5rem'}}>
+                    <div className="api-menu-item" onClick={() => setApiTab('channel_create')} style={{background: apiTab === 'channel_create' ? 'rgba(255,255,255,0.05)' : ''}}>
+                       <span className="api-badge post" style={{background: '#0ea5e9'}}>POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>CREAR CANAL</span>
+                    </div>
+                    <div className="api-menu-item" onClick={() => setApiTab('channel_send')} style={{background: apiTab === 'channel_send' ? 'rgba(255,255,255,0.05)' : ''}}>
+                       <span className="api-badge post" style={{background: '#0ea5e9'}}>POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>ENVIAR AL CANAL</span>
+                    </div>
+                    <div className="api-menu-item" onClick={() => setApiTab('channel_manage')} style={{background: apiTab === 'channel_manage' ? 'rgba(255,255,255,0.05)' : ''}}>
+                       <span className="api-badge get" style={{background: '#0ea5e9'}}>PATCH</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>ACTUALIZAR CANAL</span>
+                    </div>
+                  </div>
+
+                  <h4 style={{fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>Grupos</h4>
+                   <div className="api-menu" style={{marginTop: 0, marginBottom: '1.5rem'}}>
+                     <div className="api-menu-item" onClick={() => setApiTab('group_create')} style={{background: apiTab === 'group_create' ? 'rgba(255,255,255,0.05)' : ''}}>
+                        <span className="api-badge post" style={{background: '#16a34a'}}>POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>CREAR GRUPO</span>
+                     </div>
+                     <div className="api-menu-item" onClick={() => setApiTab('group_participants')} style={{background: apiTab === 'group_participants' ? 'rgba(255,255,255,0.05)' : ''}}>
+                        <span className="api-badge post" style={{background: '#16a34a'}}>POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>PARTICIPANTES</span>
+                     </div>
+                     <div className="api-menu-item" onClick={() => setApiTab('group_manage')} style={{background: apiTab === 'group_manage' ? 'rgba(255,255,255,0.05)' : ''}}>
+                        <span className="api-badge get" style={{background: '#16a34a'}}>PATCH</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>EDITAR GRUPO</span>
+                     </div>
+                   </div>
+
                   <h4 style={{fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>Webhooks (Entrantes)</h4>
                   <div className="api-menu" style={{marginTop: 0, marginBottom: '1.5rem'}}>
                     <div className="api-menu-item" onClick={() => setApiTab('webhook_message')} style={{background: apiTab === 'webhook_message' ? 'rgba(255,255,255,0.05)' : ''}}>
@@ -800,6 +940,188 @@ const response = await axios.post('${API_URL}/${instance.id}/stories', {
   color: '#FF5733', // (Opcional) Fondo en Hexadecimal
   font: 1 // (Opcional) Tipografía del 0 al 4
 });`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'channel_create' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Crear Canal de WhatsApp</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Genera un nuevo Canal (Newsletter) de WhatsApp. El canal pertenece al número vinculado en esta instancia. Recibirás el JID del canal para usarlo en los demás endpoints.</p>
+                      <div className="api-code-panel">
+<pre>{`// 1. Crear el Canal
+const response = await axios.post('${API_URL}/${instance.id}/channels', {
+  token: '${instance.token}',
+  name: 'Mi Canal de Noticias',
+  description: 'Aquí publicamos las últimas noticias 📰' // Opcional
+});
+
+// Resultado: Guarda el channel.id para usarlo después
+{
+  "success": true,
+  "channel": {
+    "id": "120363xxxxxx@newsletter",
+    "name": "Mi Canal de Noticias",
+    "description": "...",
+    "invite": "https://whatsapp.com/channel/...",
+    "subscribers": 0
+  }
+}`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'channel_send' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Enviar Mensaje a un Canal</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Publica texto, imagen o video en tu canal. El <code>channelId</code> es el JID que obtuviste al crearlo (termina en <code>@newsletter</code>).</p>
+                      <div className="api-code-panel">
+<pre>{`// Publicar texto en el canal
+const response = await axios.post(
+  '${API_URL}/${instance.id}/channels/120363xxxxxx@newsletter/messages',
+  {
+    token: '${instance.token}',
+    type: 'text', // 'text', 'image', 'video'
+    text: '¡Bienvenidos al canal! 🚀'
+  }
+);
+
+// Con imagen:
+{
+  token: '${instance.token}',
+  type: 'image',
+  image: 'https://ejemplo.com/banner.jpg',
+  caption: 'Texto descriptivo opcional'
+}`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'channel_manage' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Gestionar el Canal (Actualizar / Eliminar)</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Actualiza el nombre, descripción o foto del canal. También puedes consultarlo, seguirlo o eliminarlo.</p>
+                      <div className="api-code-panel">
+<pre>{`// Actualizar datos del canal
+await axios.patch(
+  '${API_URL}/${instance.id}/channels/120363xxxxxx@newsletter?token=${instance.token}',
+  {
+    token: '${instance.token}',
+    name: 'Nuevo Nombre', // Opcional
+    description: 'Nueva descripción', // Opcional
+    picture: 'https://url.com/logo.jpg' // Opcional, URL o base64
+  }
+);
+
+// Obtener metadata del canal (GET)
+await axios.get(
+  '${API_URL}/${instance.id}/channels/120363xxxxxx@newsletter?token=${instance.token}'
+);
+
+// Seguir un canal externo
+await axios.post('${API_URL}/${instance.id}/channels/120363xxxxxx@newsletter/follow', {
+  token: '${instance.token}'
+});
+
+// Eliminar el canal (solo propietario)
+await axios.delete(
+  '${API_URL}/${instance.id}/channels/120363xxxxxx@newsletter?token=${instance.token}'
+);`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'group_create' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Crear Grupo de WhatsApp</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Crea un grupo con nombre y participantes. Todos reciben la invitación automáticamente. El campo <code>participants</code> acepta números en formato <code>52811@c.us</code>.</p>
+                      <div className="api-code-panel">
+<pre>{`// Crear grupo nuevo
+const res = await axios.post('${API_URL}/${instance.id}/groups', {
+  token: '${instance.token}',
+  name: 'Equipo de Ventas Q1',
+  participants: ['528110000001@c.us', '528110000002@c.us']
+});
+// { "success": true, "group": { "id": "120363xxx@g.us", ... } }
+
+// Listar todos los grupos (GET)
+const todos = await axios.get(
+  '${API_URL}/${instance.id}/groups?token=${instance.token}'
+);
+
+// Info de un grupo específico (GET)
+const info = await axios.get(
+  '${API_URL}/${instance.id}/groups/120363xxx@g.us?token=${instance.token}'
+);
+
+// Obtener link de invitación (GET)
+const link = await axios.get(
+  '${API_URL}/${instance.id}/groups/120363xxx@g.us/invite?token=${instance.token}'
+);
+// { "invite_link": "https://chat.whatsapp.com/XXXX" }
+
+// Unirse a grupo por código
+await axios.post('${API_URL}/${instance.id}/groups/join', {
+  token: '${instance.token}',
+  code: 'XXXXXX'
+});
+
+// Salir del grupo
+await axios.post('${API_URL}/${instance.id}/groups/120363xxx@g.us/leave', {
+  token: '${instance.token}'
+});`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'group_participants' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Gestionar Participantes del Grupo</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Agrega, elimina, promueve o degrada miembros con el campo <code>action</code>.</p>
+                      <div className="api-code-panel">
+<pre>{`// action: 'add' | 'remove' | 'promote' | 'demote'
+await axios.post(
+  '${API_URL}/${instance.id}/groups/120363xxx@g.us/participants',
+  {
+    token: '${instance.token}',
+    action: 'add',
+    participants: ['528110000003@c.us']
+  }
+);
+
+// Bloquearlo a solo admins pueden enviar mensajes
+await axios.post(
+  '${API_URL}/${instance.id}/groups/120363xxx@g.us/settings',
+  {
+    token: '${instance.token}',
+    setting: 'announcement' // 'announcement'|'not_announcement'|'locked'|'unlocked'
+  }
+);`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'group_manage' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Editar Nombre, Descripción y Foto</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Actualiza el nombre, descripción o foto. Solo los campos enviados se modifican.</p>
+                      <div className="api-code-panel">
+<pre>{`await axios.patch(
+  '${API_URL}/${instance.id}/groups/120363xxx@g.us',
+  {
+    token: '${instance.token}',
+    name: 'Nuevo Nombre',               // Opcional
+    description: 'Nueva descripción',  // Opcional
+    picture: 'https://url.com/foto.jpg' // Opcional
+  }
+);
+
+// Resetear enlace de invitación
+await axios.post(
+  '${API_URL}/${instance.id}/groups/120363xxx@g.us/invite/revoke',
+  { token: '${instance.token}' }
+);
+// { "new_invite_link": "https://chat.whatsapp.com/NUEVO" }`}</pre>
                       </div>
                     </>
                   )}
