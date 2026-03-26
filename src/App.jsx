@@ -823,6 +823,26 @@ POST /:instanceId/groups/:groupId/settings
                      </div>
                    </div>
 
+                   <h4 style={{fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>Difusión / Broadcast</h4>
+                   <div className="api-menu" style={{marginTop: 0, marginBottom: '1.5rem'}}>
+                     <div className="api-menu-item" onClick={() => setApiTab('broadcast')} style={{background: apiTab === 'broadcast' ? 'rgba(255,255,255,0.05)' : ''}}>
+                        <span className="api-badge post" style={{background: '#ea580c'}}>POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>DIFUSIÓN MASIVA</span>
+                     </div>
+                   </div>
+
+                   <h4 style={{fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>Contactos & Misc</h4>
+                   <div className="api-menu" style={{marginTop: 0, marginBottom: '1.5rem'}}>
+                     <div className="api-menu-item" onClick={() => setApiTab('contacts')} style={{background: apiTab === 'contacts' ? 'rgba(255,255,255,0.05)' : ''}}>
+                        <span className="api-badge post">POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>CONTACTOS</span>
+                     </div>
+                     <div className="api-menu-item" onClick={() => setApiTab('reactions')} style={{background: apiTab === 'reactions' ? 'rgba(255,255,255,0.05)' : ''}}>
+                        <span className="api-badge post">POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>REACCIONES</span>
+                     </div>
+                     <div className="api-menu-item" onClick={() => setApiTab('labels')} style={{background: apiTab === 'labels' ? 'rgba(255,255,255,0.05)' : ''}}>
+                        <span className="api-badge post">POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>ETIQUETAS</span>
+                     </div>
+                   </div>
+
                   <h4 style={{fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>Webhooks (Entrantes)</h4>
                   <div className="api-menu" style={{marginTop: 0, marginBottom: '1.5rem'}}>
                     <div className="api-menu-item" onClick={() => setApiTab('webhook_message')} style={{background: apiTab === 'webhook_message' ? 'rgba(255,255,255,0.05)' : ''}}>
@@ -1122,6 +1142,111 @@ await axios.post(
   { token: '${instance.token}' }
 );
 // { "new_invite_link": "https://chat.whatsapp.com/NUEVO" }`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'broadcast' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Difusión Masiva (Lista de Difusión)</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Envía el mismo mensaje a múltiples números como mensajes <strong>individuales</strong> (no grupo). Cada uno lo recibe en su chat privado con tu número. Incluye un delay de 300ms entre envíos para evitar bloqueos.</p>
+                      <div className="api-code-panel">
+<pre>{`const res = await axios.post('${API_URL}/${instance.id}/broadcast', {
+  token: '${instance.token}',
+  recipients: [
+    '528110000001@c.us',
+    '528110000002@c.us',
+    '528110000003@c.us'
+  ],
+  type: 'text',   // 'text' | 'image' | 'video' | 'audio' | 'document'
+  body: '¡Hola! Promo especial hoy 🔥'
+});
+
+// Resultado detallado por número:
+{
+  "success": true,
+  "sent": 3,
+  "total": 3,
+  "results": [
+    { "to": "528110000001@c.us", "status": "sent", "id": "3EB0..." },
+    { "to": "528110000002@c.us", "status": "sent", "id": "3EB1..." },
+    { "to": "528110000003@c.us", "status": "failed", "error": "Number not on WhatsApp" }
+  ]
+}`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'contacts' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Crear / Editar / Eliminar Contacto</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Guarda o edita un contacto directamente en la agenda del número vinculado. útil para que los clientes queden registrados con nombre antes de enviarles mensajes.</p>
+                      <div className="api-code-panel">
+<pre>{`// Agregar o editar contacto
+await axios.post('${API_URL}/${instance.id}/contacts', {
+  token: '${instance.token}',
+  number: '528110000001@c.us',
+  firstName: 'Juan',
+  lastName: 'Pérez' // Opcional
+});
+// { "success": true, "jid": "...@s.whatsapp.net", "name": "Juan Pérez" }
+
+// Eliminar contacto
+await axios.delete(
+  '${API_URL}/${instance.id}/contacts/528110000001?token=${instance.token}'
+);`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'reactions' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Reaccionar a un Mensaje</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Manda una reacción emoji a cualquier mensaje existente usando su <code>messageId</code>. Para <strong>eliminar</strong> la reacción, envía <code>emoji: ""</code> (string vacío).</p>
+                      <div className="api-code-panel">
+<pre>{`// Reaccionar con ❤️
+await axios.post('${API_URL}/${instance.id}/messages/react', {
+  token: '${instance.token}',
+  to: '528110000001@c.us',
+  messageId: '3EB0BC...', // ID del mensaje a reaccionar
+  emoji: '❤️'           // Cualquier emoji: '👍', '😂', '😲', '😢', '🙏'
+});
+
+// Quitar la reacción
+await axios.post('${API_URL}/${instance.id}/messages/react', {
+  token: '${instance.token}',
+  to: '528110000001@c.us',
+  messageId: '3EB0BC...',
+  emoji: '' // String vacío = elimina la reacción
+});`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'labels' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Etiquetas (Labels) de WhatsApp Business</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Asigna o elimina etiquetas de chats y mensajes. El <code>labelId</code> se obtiene de las etiquetas ya creadas en tu WhatsApp Business (p. ej. "1", "2", etc.).</p>
+                      <div className="api-code-panel">
+<pre>{`// Agregar etiqueta a un CHAT completo
+await axios.post('${API_URL}/${instance.id}/labels/chat', {
+  token: '${instance.token}',
+  to: '528110000001@c.us',
+  labelId: '1' // ID de la etiqueta en WA Business
+});
+
+// Quitar etiqueta de un CHAT
+await axios.delete('${API_URL}/${instance.id}/labels/chat', {
+  data: { token: '${instance.token}', to: '528110000001@c.us', labelId: '1' }
+});
+
+// Agregar etiqueta a un MENSAJE específico
+await axios.post('${API_URL}/${instance.id}/labels/message', {
+  token: '${instance.token}',
+  to: '528110000001@c.us',
+  messageId: '3EB0BC...',
+  labelId: '2'
+});`}</pre>
                       </div>
                     </>
                   )}
