@@ -1181,8 +1181,8 @@ await axios.post(
 
                   {apiTab === 'contacts' && (
                     <>
-                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Crear / Editar / Eliminar Contacto</h3>
-                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Guarda o edita un contacto directamente en la agenda del número vinculado. útil para que los clientes queden registrados con nombre antes de enviarles mensajes.</p>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Crear / Editar / Eliminar / Bloquear</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Guarda, edita, elimina o bloquea un contacto directamente en la agenda del número vinculado. útil para evitar recibir más mensajes de ese número o para guardarlo.</p>
                       <div className="api-code-panel">
 <pre>{`// Agregar o editar contacto
 await axios.post('${API_URL}/${instance.id}/contacts', {
@@ -1191,12 +1191,18 @@ await axios.post('${API_URL}/${instance.id}/contacts', {
   firstName: 'Juan',
   lastName: 'Pérez' // Opcional
 });
-// { "success": true, "jid": "...@s.whatsapp.net", "name": "Juan Pérez" }
 
 // Eliminar contacto
 await axios.delete(
   '${API_URL}/${instance.id}/contacts/528110000001?token=${instance.token}'
-);`}</pre>
+);
+
+// Bloquear / Desbloquear contacto
+await axios.post('${API_URL}/${instance.id}/contacts/block', {
+  token: '${instance.token}',
+  number: '528110000001@c.us',
+  action: 'block' // 'block' | 'unblock'
+});`}</pre>
                       </div>
                     </>
                   )}
