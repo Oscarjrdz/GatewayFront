@@ -194,6 +194,21 @@ function App() {
     }
   };
 
+  const handleReconnect = async () => {
+    try {
+      showToast('Intentando reconectar...', 'success');
+      await fetch(`${API_URL}/${instance.id}/reconnect`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: instance.token })
+      });
+      showToast('Reconexión solicitada al servidor');
+      checkStatus();
+    } catch (err) {
+      showToast('Error al reconectar', 'error');
+    }
+  };
+
   const handleLogout = () => {
     setInstance(null);
     setStatus('loading');
@@ -662,7 +677,24 @@ POST /:instanceId/groups/:groupId/settings
               </div>
             )}
             
-            <button onClick={deleteInstance} className="btn" style={{background: 'transparent', border: '1px solid var(--error)', color: 'var(--error)', marginTop: 'auto', paddingTop:'0.75rem', paddingBottom:'0.75rem'}}>Eliminar Instancia</button>
+            {status === 'disconnected' && (
+              <button 
+                onClick={handleReconnect} 
+                className="btn" 
+                style={{
+                  background: 'var(--primary-color, rgb(59, 130, 246))', 
+                  color: 'white', 
+                  marginTop: 'auto', 
+                  marginBottom: '10px',
+                  paddingTop:'0.75rem', 
+                  paddingBottom:'0.75rem'
+                }}
+              >
+                Volver a Conectar (Re-Connect)
+              </button>
+            )}
+
+            <button onClick={deleteInstance} className="btn" style={{background: 'transparent', border: '1px solid var(--error)', color: 'var(--error)', marginTop: status === 'disconnected' ? '0' : 'auto', paddingTop:'0.75rem', paddingBottom:'0.75rem'}}>Eliminar Instancia</button>
 
           </div>
 
