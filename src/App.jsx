@@ -182,15 +182,21 @@ function App() {
   const deleteInstance = async () => {
     if(!window.confirm('¿Seguro que deseas eliminar esta instancia y desconectar su número permanentemente?')) return;
     try {
-      await fetch(`${API_URL}/${instance.id}/logout`, {
+      const res = await fetch(`${API_URL}/${instance.id}/logout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: instance.token })
       });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        throw new Error(data.error || `HTTP ${res.status}`);
+      }
       showToast('Instancia eliminada');
       handleLogout();
+      fetchAllInstances();
     } catch (err) {
-      showToast('Error al eliminar', 'error');
+      console.error('Delete failed:', err);
+      showToast('Error al eliminar: ' + err.message, 'error');
     }
   };
 
