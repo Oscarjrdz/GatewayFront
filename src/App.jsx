@@ -24,6 +24,7 @@ function App() {
 
   // List of all instances in Backend
   const [allInstances, setAllInstances] = useState([]);
+  const [systemInfo, setSystemInfo] = useState(null);
   const [apiTab, setApiTab] = useState('chat');
   
   const prevStatusRef = useRef('loading');
@@ -45,6 +46,14 @@ function App() {
       const res = await fetch(`${API_URL}/instances`);
       const data = await res.json();
       setAllInstances(data);
+      
+      // Fetch system info
+      try {
+        const sysRes = await fetch(`${API_URL}/system/info`);
+        const sysData = await sysRes.json();
+        setSystemInfo(sysData);
+      } catch (err) { console.error('Error fetching system info', err); }
+      
     } catch (e) { console.error('Error fetching list', e); }
   };
 
@@ -576,7 +585,22 @@ POST /:instanceId/groups/:groupId/settings
           </div>
 
           <div className="glass-card" style={{margin: '0 auto', width: '100%'}}>
-            <h2 style={{borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1rem'}}>Tus Instancias Activas (Master Dashboard)</h2>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem'}}>
+              <h2 style={{margin: 0}}>Tus Instancias Activas (Master Dashboard)</h2>
+              {systemInfo && systemInfo.success && systemInfo.network && (
+                <div style={{display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(0,0,0,0.2)', padding: '0.5rem 1rem', borderRadius: '8px', border: systemInfo.using_proxy ? '1px solid var(--success)' : '1px solid var(--border-color)'}}>
+                  <div style={{width: '10px', height: '10px', borderRadius: '50%', backgroundColor: systemInfo.using_proxy ? 'var(--success)' : 'orange'}} title={systemInfo.using_proxy ? "Proxy SOCKS Activo" : "Sin Proxy"}></div>
+                  <div style={{display: 'flex', flexDirection: 'column'}}>
+                    <span style={{fontSize: '0.75rem', color: 'var(--text-secondary)'}}>
+                      {systemInfo.using_proxy ? '📡 Red Segura (Proxy Activo)' : '🌐 Red Pública (Nube)'}
+                    </span>
+                    <span style={{fontSize: '0.85rem', fontWeight: 'bold'}}>
+                      {systemInfo.network.city}, {systemInfo.network.countryCode} • {systemInfo.network.ip}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
             {allInstances.length === 0 ? (
               <p>No se han encontrado instancias en tu servidor de Railway.</p>
             ) : (
