@@ -887,6 +887,25 @@ POST /:instanceId/groups/:groupId/settings
                      </div>
                    </div>
 
+                   <h4 style={{fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>Catálogo (Business)</h4>
+                   <div className="api-menu" style={{marginTop: 0, marginBottom: '1.5rem'}}>
+                     <div className="api-menu-item" onClick={() => setApiTab('catalog_get')} style={{background: apiTab === 'catalog_get' ? 'rgba(255,255,255,0.05)' : ''}}>
+                        <span className="api-badge get">GET</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>VER CATÁLOGO</span>
+                     </div>
+                     <div className="api-menu-item" onClick={() => setApiTab('catalog_product')} style={{background: apiTab === 'catalog_product' ? 'rgba(255,255,255,0.05)' : ''}}>
+                        <span className="api-badge get">GET</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>PRODUCTO POR ID</span>
+                     </div>
+                     <div className="api-menu-item" onClick={() => setApiTab('catalog_create')} style={{background: apiTab === 'catalog_create' ? 'rgba(255,255,255,0.05)' : ''}}>
+                        <span className="api-badge post" style={{background: '#8b5cf6'}}>POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>CREAR PRODUCTO</span>
+                     </div>
+                     <div className="api-menu-item" onClick={() => setApiTab('catalog_update')} style={{background: apiTab === 'catalog_update' ? 'rgba(255,255,255,0.05)' : ''}}>
+                        <span className="api-badge get" style={{background: '#8b5cf6'}}>PATCH</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>EDITAR PRODUCTO</span>
+                     </div>
+                     <div className="api-menu-item" onClick={() => setApiTab('catalog_delete')} style={{background: apiTab === 'catalog_delete' ? 'rgba(255,255,255,0.05)' : ''}}>
+                        <span className="api-badge post" style={{background: '#dc2626'}}>DELETE</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>ELIMINAR</span>
+                     </div>
+                   </div>
+
                    <h4 style={{fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>Difusión / Broadcast</h4>
                    <div className="api-menu" style={{marginTop: 0, marginBottom: '1.5rem'}}>
                      <div className="api-menu-item" onClick={() => setApiTab('broadcast')} style={{background: apiTab === 'broadcast' ? 'rgba(255,255,255,0.05)' : ''}}>
@@ -1206,6 +1225,155 @@ await axios.post(
   { token: '${instance.token}' }
 );
 // { "new_invite_link": "https://chat.whatsapp.com/NUEVO" }`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'catalog_get' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Ver Catálogo de Productos</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Obtiene todos los productos del catálogo de WhatsApp Business. Por defecto jala <strong>tu propio catálogo</strong>. Puedes consultar el de otro negocio pasando su JID con <code>?jid=</code>. Soporta paginación con <code>limit</code> y <code>cursor</code>.</p>
+                      <div className="api-code-panel">
+<pre>{`// Tu propio catálogo
+const res = await axios.get(
+  '${API_URL}/${instance.id}/catalog?token=${instance.token}'
+);
+console.log(res.data.products);
+// [{ id, name, description, price, currencyCode, images, ... }]
+
+// Catálogo de OTRO número Business
+const otro = await axios.get(
+  '${API_URL}/${instance.id}/catalog?token=${instance.token}&jid=5215512345678@s.whatsapp.net'
+);
+
+// Paginación (20 productos por página)
+const page1 = await axios.get(
+  '${API_URL}/${instance.id}/catalog?token=${instance.token}&limit=20'
+);
+// Si hay más: page1.data.nextPageCursor
+const page2 = await axios.get(
+  '${API_URL}/${instance.id}/catalog?token=${instance.token}&limit=20&cursor=' + page1.data.nextPageCursor
+);
+
+// Respuesta:
+{
+  "success": true,
+  "jid": "5218116038195@s.whatsapp.net",
+  "count": 12,
+  "nextPageCursor": null,
+  "products": [
+    {
+      "id": "8234567890123",
+      "name": "Hamburguesa Doble",
+      "description": "Con queso y tocino",
+      "price": 15000,
+      "currencyCode": "MXN",
+      "images": [{ "url": "https://..." }],
+      "isHidden": false
+    }
+  ]
+}`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'catalog_product' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Obtener Producto por ID</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Busca un producto específico dentro del catálogo usando su <code>productId</code>. Útil para mostrar detalles completos de un artículo al cliente.</p>
+                      <div className="api-code-panel">
+<pre>{`const res = await axios.get(
+  '${API_URL}/${instance.id}/catalog/8234567890123?token=${instance.token}'
+);
+
+console.log(res.data.product);
+// {
+//   id: '8234567890123',
+//   name: 'Hamburguesa Doble',
+//   description: 'Con queso y tocino',
+//   price: 15000,
+//   currencyCode: 'MXN',
+//   images: [{ url: 'https://...' }],
+//   retailerId: 'HAM-001',
+//   isHidden: false
+// }`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'catalog_create' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Crear Producto en el Catálogo</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Agrega un producto nuevo a tu catálogo de WhatsApp Business. El precio se envía en <strong>centavos</strong> (ej: 15000 = $150.00 MXN). Las imágenes se pasan como array de URLs públicas.</p>
+                      <div className="api-code-panel">
+<pre>{`const res = await axios.post('${API_URL}/${instance.id}/catalog', {
+  token: '${instance.token}',
+  name: 'Pizza Hawaiana Grande',
+  description: 'Jamón, piña y queso mozzarella',
+  price: 18900,       // $189.00 MXN (en centavos)
+  currency: 'MXN',
+  images: ['https://ejemplo.com/pizza.jpg'],
+  retailerId: 'PIZ-HAW-G', // Opcional: tu SKU interno
+  isHidden: false          // Opcional: ocultar del catálogo público
+});
+
+// Respuesta:
+{
+  "success": true,
+  "product": {
+    "id": "9876543210987",
+    "name": "Pizza Hawaiana Grande",
+    ...
+  }
+}`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'catalog_update' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Actualizar Producto Existente</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Modifica cualquier campo de un producto existente. Solo los campos enviados se actualizan — los demás permanecen sin cambios.</p>
+                      <div className="api-code-panel">
+<pre>{`await axios.patch(
+  '${API_URL}/${instance.id}/catalog/9876543210987',
+  {
+    token: '${instance.token}',
+    name: 'Pizza Hawaiana XL',     // Opcional
+    price: 22900,                   // Opcional: nuevo precio
+    description: 'Ahora más grande', // Opcional
+    images: ['https://nueva-foto.jpg'], // Opcional
+    isHidden: false                 // Opcional: mostrar/ocultar
+  }
+);
+
+// { "success": true, "product": { ... } }`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'catalog_delete' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Eliminar Productos del Catálogo</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Elimina uno o varios productos por sus IDs. Pasa un array <code>productIds[]</code> con los IDs a borrar.</p>
+                      <div className="api-code-panel">
+<pre>{`// Eliminar un solo producto
+await axios.delete('${API_URL}/${instance.id}/catalog', {
+  data: {
+    token: '${instance.token}',
+    productIds: ['9876543210987']
+  }
+});
+
+// Eliminar varios productos de golpe
+await axios.delete('${API_URL}/${instance.id}/catalog', {
+  data: {
+    token: '${instance.token}',
+    productIds: ['111111', '222222', '333333']
+  }
+});
+
+// { "success": true, "deleted": 3 }`}</pre>
                       </div>
                     </>
                   )}
