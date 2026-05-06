@@ -904,6 +904,9 @@ POST /:instanceId/groups/:groupId/settings
                      <div className="api-menu-item" onClick={() => setApiTab('catalog_delete')} style={{background: apiTab === 'catalog_delete' ? 'rgba(255,255,255,0.05)' : ''}}>
                         <span className="api-badge post" style={{background: '#dc2626'}}>DELETE</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>ELIMINAR</span>
                      </div>
+                     <div className="api-menu-item" onClick={() => setApiTab('catalog_orders')} style={{background: apiTab === 'catalog_orders' ? 'rgba(255,255,255,0.05)' : ''}}>
+                        <span className="api-badge webhook">EVENT</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>PEDIDOS (CARRITO)</span>
+                     </div>
                    </div>
 
                    <h4 style={{fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '0.5rem'}}>Difusión / Broadcast</h4>
@@ -1378,6 +1381,67 @@ await axios.delete('${API_URL}/${instance.id}/catalog', {
                     </>
                   )}
 
+                  {apiTab === 'catalog_orders' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Recibir Pedidos del Carrito (Webhook)</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Cuando un cliente abre tu catálogo de WhatsApp Business, selecciona productos y envía el carrito, tu webhook recibe un mensaje con <code>type: "order"</code> y un objeto <code>order</code> con todos los detalles. <strong>No necesitas hacer nada extra</strong>, el Gateway detecta automáticamente los pedidos y los reenvía a tu webhook.</p>
+                      <div className="api-code-panel">
+<pre>{`// Lo que tu servidor recibe cuando un cliente envía un carrito:
+{
+  "event_type": "message_received",
+  "instanceId": "${instance.id}",
+  "data": {
+    "id": "3EB0BC...",
+    "from": "5218110000000@c.us",
+    "to": "BOT_NUMBER@c.us",
+    "pushName": "Juan Pérez",
+    "body": "Pedido de 3 producto(s)",  // Nota del cliente o resumen auto
+    "type": "order",                   // 👈 Tipo especial para pedidos
+    "fromMe": false,
+    "order": {                          // 👈 Datos completos del pedido
+      "orderId": "987654321",
+      "itemCount": 3,
+      "status": "INQUIRY",             // Estado: INQUIRY = nuevo pedido
+      "surface": "CATALOG",            // Origen: catálogo de WA
+      "message": "Sin cebolla por favor", // Nota del cliente (puede ser "")
+      "orderTitle": "El Diablito",     // Nombre de tu negocio
+      "sellerJid": "5218116038195@s.whatsapp.net",
+      "token": "abc123...",            // Token interno de WhatsApp
+      "totalAmount1000": 45000,        // Total en milésimas: 45000 = $45.00
+      "totalCurrencyCode": "MXN"       // Moneda
+    },
+    "__raw": { ... }
+  }
+}
+
+// ─── Cómo procesarlo en tu webhook: ───
+app.post('/webhook', (req, res) => {
+  const { event_type, data } = req.body;
+
+  if (data.type === 'order') {
+    const pedido = data.order;
+    const total = (pedido.totalAmount1000 / 1000).toFixed(2);
+
+    console.log('🛒 NUEVO PEDIDO');
+    console.log('Cliente:', data.pushName, data.from);
+    console.log('Productos:', pedido.itemCount);
+    console.log('Total: $' + total, pedido.totalCurrencyCode);
+    console.log('Nota:', pedido.message || 'Sin nota');
+
+    // Aquí puedes: notificar al dueño, guardar en DB, etc.
+  }
+
+  res.json({ success: true });
+});`}</pre>
+                      </div>
+                      <div style={{marginTop: '1rem', padding: '0.75rem 1rem', background: 'rgba(234,179,8,0.08)', borderRadius: '8px', border: '1px solid rgba(234,179,8,0.2)'}}>
+                        <p style={{fontSize: '0.8rem', color: '#eab308', margin: 0}}>
+                          ⚠️ <strong>Nota:</strong> El campo <code>totalAmount1000</code> viene en <strong>milésimas</strong> (divide entre 1000 para obtener pesos). El campo <code>order.message</code> contiene la nota que el cliente escribió al enviar el carrito. Si no escribió nada, llegará como string vacío.
+                        </p>
+                      </div>
+                    </>
+                  )}
+
                   {apiTab === 'broadcast' && (
                     <>
                       <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Difusión Masiva (Lista de Difusión)</h3>
@@ -1620,7 +1684,8 @@ console.log(response.data);`}</pre>
                         <li><strong style={{color:'white'}}>Número Ajeno entrante:</strong> <code>data.from</code> (Sufijo estándar en modo @c.us).</li>
                         <li><strong style={{color:'white'}}>Filtro Anti-Salientes:</strong> Analiza si <code>data.fromMe = true</code> para ignorar si tu bot se responde a sí mismo.</li>
                         <li><strong style={{color:'white'}}>Nombre del Cliente:</strong> <code>data.pushName</code> (Lo que puso el usuario en su biografía de WhatsApp).</li>
-                        <li><strong style={{color:'white'}}>Tipo de medio:</strong> <code>data.type</code> (chat, image, document, audio, video).</li>
+                        <li><strong style={{color:'white'}}>Tipo de medio:</strong> <code>data.type</code> (chat, image, document, audio, video, sticker, reaction, <strong>order</strong>).</li>
+                        <li><strong style={{color:'white'}}>Pedido del Carrito:</strong> <code>data.order</code> (Solo cuando <code>type === "order"</code>. Contiene: orderId, itemCount, totalAmount1000, totalCurrencyCode, message, status).</li>
                       </ul>
                     </>
                   )}
