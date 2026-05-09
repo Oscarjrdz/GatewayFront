@@ -209,16 +209,17 @@ function App() {
     }
   };
 
-  const handleReconnect = async () => {
+  const handleReconnect = async (force = false) => {
     try {
-      showToast('Intentando reconectar...', 'success');
+      showToast(force ? 'Forzando reconexión limpia...' : 'Intentando reconectar...', 'success');
       await fetch(`${API_URL}/${instance.id}/reconnect`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: instance.token })
+        body: JSON.stringify({ token: instance.token, force })
       });
-      showToast('Reconexión solicitada al servidor');
-      checkStatus();
+      showToast(force ? 'Sesión limpiada — el QR aparecerá en segundos' : 'Reconexión solicitada al servidor');
+      // Wait a moment then check for QR
+      setTimeout(checkStatus, 2000);
     } catch (err) {
       showToast('Error al reconectar', 'error');
     }
@@ -707,21 +708,37 @@ POST /:instanceId/groups/:groupId/settings
               </div>
             )}
             
-            {status === 'disconnected' && (
-              <button 
-                onClick={handleReconnect} 
-                className="btn" 
-                style={{
-                  background: 'var(--primary-color, rgb(59, 130, 246))', 
-                  color: 'white', 
-                  marginTop: 'auto', 
-                  marginBottom: '10px',
-                  paddingTop:'0.75rem', 
-                  paddingBottom:'0.75rem'
-                }}
-              >
-                Volver a Conectar (Re-Connect)
-              </button>
+            {(status === 'disconnected' || status === 'qr') && (
+              <div style={{display: 'flex', flexDirection: 'column', gap: '8px', marginTop: status === 'disconnected' ? 'auto' : '0'}}>
+                {status === 'disconnected' && (
+                  <button 
+                    onClick={() => handleReconnect(false)} 
+                    className="btn" 
+                    style={{
+                      background: 'var(--primary-color, rgb(59, 130, 246))', 
+                      color: 'white', 
+                      paddingTop:'0.75rem', 
+                      paddingBottom:'0.75rem'
+                    }}
+                  >
+                    🔄 Reconectar
+                  </button>
+                )}
+                <button 
+                  onClick={() => handleReconnect(true)} 
+                  className="btn" 
+                  style={{
+                    background: 'rgba(245, 158, 11, 0.15)', 
+                    border: '1px solid rgba(245, 158, 11, 0.5)',
+                    color: '#f59e0b', 
+                    paddingTop:'0.65rem', 
+                    paddingBottom:'0.65rem',
+                    fontSize: '0.82rem'
+                  }}
+                >
+                  ⚡ Forzar QR Nuevo (Limpiar Sesión)
+                </button>
+              </div>
             )}
 
             <button onClick={deleteInstance} className="btn" style={{background: 'transparent', border: '1px solid var(--error)', color: 'var(--error)', marginTop: status === 'disconnected' ? '0' : 'auto', paddingTop:'0.75rem', paddingBottom:'0.75rem'}}>Eliminar Instancia</button>
