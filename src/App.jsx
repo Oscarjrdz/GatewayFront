@@ -938,6 +938,12 @@ POST /:instanceId/groups/:groupId/settings
                      <div className="api-menu-item" onClick={() => setApiTab('contacts')} style={{background: apiTab === 'contacts' ? 'rgba(255,255,255,0.05)' : ''}}>
                         <span className="api-badge post">POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>CONTACTOS</span>
                      </div>
+                     <div className="api-menu-item" onClick={() => setApiTab('block')} style={{background: apiTab === 'block' ? 'rgba(255,255,255,0.05)' : ''}}>
+                        <span className="api-badge post">POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>BLOQUEAR</span>
+                     </div>
+                     <div className="api-menu-item" onClick={() => setApiTab('unblock')} style={{background: apiTab === 'unblock' ? 'rgba(255,255,255,0.05)' : ''}}>
+                        <span className="api-badge post">POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>DESBLOQUEAR</span>
+                     </div>
                      <div className="api-menu-item" onClick={() => setApiTab('reactions')} style={{background: apiTab === 'reactions' ? 'rgba(255,255,255,0.05)' : ''}}>
                         <span className="api-badge post">POST</span> <span style={{fontSize:'0.85rem', fontWeight:'500'}}>REACCIONES</span>
                      </div>
@@ -1492,8 +1498,8 @@ app.post('/webhook', (req, res) => {
 
                   {apiTab === 'contacts' && (
                     <>
-                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Crear / Editar / Eliminar / Bloquear</h3>
-                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Guarda, edita, elimina o bloquea un contacto directamente en la agenda del número vinculado. útil para evitar recibir más mensajes de ese número o para guardarlo.</p>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Crear / Editar / Eliminar Contacto</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Guarda, edita o elimina un contacto directamente en la agenda del número vinculado.</p>
                       <div className="api-code-panel">
 <pre>{`// Agregar o editar contacto
 await axios.post('${API_URL}/${instance.id}/contacts', {
@@ -1506,14 +1512,37 @@ await axios.post('${API_URL}/${instance.id}/contacts', {
 // Eliminar contacto
 await axios.delete(
   '${API_URL}/${instance.id}/contacts/528110000001?token=${instance.token}'
-);
+);`}</pre>
+                      </div>
+                    </>
+                  )}
 
-// Bloquear / Desbloquear contacto
-await axios.post('${API_URL}/${instance.id}/contacts/block', {
+                  {apiTab === 'block' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Bloquear Contacto</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Bloquea un número para que no pueda enviarte mensajes. El número puede enviarse con o sin <code>@c.us</code>.</p>
+                      <div className="api-code-panel">
+<pre>{`await axios.post('${API_URL}/${instance.id}/contacts/block', {
   token: '${instance.token}',
-  number: '528110000001@c.us',
-  action: 'block' // 'block' | 'unblock'
-});`}</pre>
+  number: '528110000001',
+  action: 'block'
+});
+// Respuesta: { "success": true, "jid": "528110000001@s.whatsapp.net", "action": "block" }`}</pre>
+                      </div>
+                    </>
+                  )}
+
+                  {apiTab === 'unblock' && (
+                    <>
+                      <h3 style={{marginBottom: '0.5rem', fontSize:'1rem'}}>Desbloquear Contacto</h3>
+                      <p style={{fontSize:'0.8rem', color:'var(--text-secondary)', marginBottom: '1rem'}}>Desbloquea un número previamente bloqueado para que pueda volver a enviarte mensajes.</p>
+                      <div className="api-code-panel">
+<pre>{`await axios.post('${API_URL}/${instance.id}/contacts/block', {
+  token: '${instance.token}',
+  number: '528110000001',
+  action: 'unblock'
+});
+// Respuesta: { "success": true, "jid": "528110000001@s.whatsapp.net", "action": "unblock" }`}</pre>
                       </div>
                     </>
                   )}
