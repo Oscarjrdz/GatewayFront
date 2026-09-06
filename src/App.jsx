@@ -613,8 +613,7 @@ POST /:instanceId/groups/:groupId/settings
                 {allInstances.map((inst) => (
                   <div key={inst.instance_id} className="copy-field" style={{flexDirection: 'column', alignItems: 'flex-start', padding: '1.25rem', cursor: 'pointer', border: '1px solid var(--border-color)', position: 'relative'}} onClick={() => {
                       setInputId(inst.instance_id.replace('instance', ''));
-                      setInputToken(inst.token);
-                      showToast('Credenciales autollenadas. Haz click en Ingresar');
+                      showToast('ID autollenado. Escribe tu token y haz click en Ingresar');
                   }}>
                     <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '0.5rem', gap: '0.5rem'}}>
                       <strong style={{color: 'var(--brand-color)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '1.05rem'}} title={inst.instance_name || inst.instance_id}>
@@ -625,7 +624,9 @@ POST /:instanceId/groups/:groupId/settings
                     {inst.instance_name && (
                       <code style={{fontSize: '0.7rem', color: 'gray', marginBottom: '0.25rem', display: 'block'}}>ID: {inst.instance_id}</code>
                     )}
-                    <code style={{fontSize: '0.75rem', marginBottom: '0.5rem', display: 'block'}}>Token: {inst.token.substring(0,8)}...</code>
+                    {!inst.instance_name && (
+                      <code style={{fontSize: '0.7rem', color: 'gray', marginBottom: '0.5rem', display: 'block'}}>ID: {inst.instance_id}</code>
+                    )}
                     <div style={{display: 'flex', gap: '0.5rem', fontSize: '0.75rem', color: 'gray'}}>
                       <span>📤 {inst.messages_sent || 0}</span>
                       <span>📥 {inst.messages_received || 0}</span>
