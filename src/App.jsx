@@ -95,6 +95,8 @@ function App() {
         messages_sent: data.messages_sent || 0,
         messages_received: data.messages_received || 0,
         webhook_url: data.webhook_url || '',
+        webhook_auth_header: data.webhook_auth_header || '',
+        webhook_auth_value: data.webhook_auth_value || '',
         webhook_message_received: data.webhook_message_received || false,
         instance_name: data.instance_name || ''
       });
@@ -177,6 +179,8 @@ function App() {
         body: JSON.stringify({
           token: instance.token,
           webhook_url: instance.webhook_url || '',
+          webhook_auth_header: instance.webhook_auth_header || '',
+          webhook_auth_value: instance.webhook_auth_value || '',
           webhook_message_received: instance.webhook_message_received || false,
           instance_name: instance.instance_name || ''
         })
@@ -816,9 +820,29 @@ POST /:instanceId/groups/:groupId/settings
                 />
               </div>
 
+              <div className="input-group">
+                <label>Header de Autenticación (Opcional)</label>
+                <input
+                  type="text"
+                  placeholder="ej. Authorization"
+                  value={instance?.webhook_auth_header || ''}
+                  onChange={e => setInstance({...instance, webhook_auth_header: e.target.value})}
+                />
+              </div>
+
+              <div className="input-group">
+                <label>Valor del Header (Opcional)</label>
+                <input
+                  type="text"
+                  placeholder="ej. Bearer TU_CLAVE_DE_CURSOR"
+                  value={instance?.webhook_auth_value || ''}
+                  onChange={e => setInstance({...instance, webhook_auth_value: e.target.value})}
+                />
+              </div>
+
               <div className="input-group" style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   id="webhook_msgs"
                   checked={instance?.webhook_message_received || false} 
                   onChange={e => setInstance({...instance, webhook_message_received: e.target.checked})}
