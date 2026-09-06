@@ -97,6 +97,7 @@ function App() {
         webhook_url: data.webhook_url || '',
         webhook_auth_header: data.webhook_auth_header || '',
         webhook_auth_value: data.webhook_auth_value || '',
+        webhook_self_chat: data.webhook_self_chat || false,
         webhook_message_received: data.webhook_message_received || false,
         instance_name: data.instance_name || ''
       });
@@ -181,6 +182,7 @@ function App() {
           webhook_url: instance.webhook_url || '',
           webhook_auth_header: instance.webhook_auth_header || '',
           webhook_auth_value: instance.webhook_auth_value || '',
+          webhook_self_chat: instance.webhook_self_chat || false,
           webhook_message_received: instance.webhook_message_received || false,
           instance_name: instance.instance_name || ''
         })
@@ -851,6 +853,19 @@ POST /:instanceId/groups/:groupId/settings
                 />
                 <label htmlFor="webhook_msgs" style={{marginBottom: 0, cursor: 'pointer'}}>
                   Llamar Webhook cuando recibas un mensaje 📥
+                </label>
+              </div>
+
+              <div className="input-group" style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
+                <input
+                  type="checkbox"
+                  id="webhook_self_chat"
+                  checked={instance?.webhook_self_chat || false}
+                  onChange={e => setInstance({...instance, webhook_self_chat: e.target.checked})}
+                  style={{width: 'auto', transform: 'scale(1.2)'}}
+                />
+                <label htmlFor="webhook_self_chat" style={{marginBottom: 0, cursor: 'pointer'}}>
+                  Incluir mensajes a mí mismo (self-chat) 🔁
                 </label>
               </div>
 
