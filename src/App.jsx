@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import './index.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://gatewaywapp-production.up.railway.app';
+// Master secret for both the private-access gate and the admin credential lookup.
+const MASTER_PASSWORD = '8116038195'; // Temporal till Google auth
 
 function App() {
   const [isAuthorized, setIsAuthorized] = useState(localStorage.getItem('admin_access') === 'true');
@@ -80,31 +82,53 @@ function App() {
     setLoading(false);
   };
 
+  // Core login: validates an id/token against the backend and opens the instance.
+  const loginWith = async (id, token) => {
+    const cleanId = id.replace('instance', '');
+    const res = await fetch(`${API_URL}/${cleanId}/status?token=${token}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    setInstance({
+      id: cleanId,
+      token,
+      messages_sent: data.messages_sent || 0,
+      messages_received: data.messages_received || 0,
+      webhook_url: data.webhook_url || '',
+      webhook_auth_header: data.webhook_auth_header || '',
+      webhook_auth_value: data.webhook_auth_value || '',
+      webhook_self_chat: data.webhook_self_chat || false,
+      webhook_message_received: data.webhook_message_received || false,
+      instance_name: data.instance_name || ''
+    });
+    setStatus(data.status);
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!inputId || !inputToken) return showToast('Completa ambos campos', 'error');
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/${inputId}/status?token=${inputToken}`);
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      
-      setInstance({ 
-        id: inputId, 
-        token: inputToken, 
-        messages_sent: data.messages_sent || 0,
-        messages_received: data.messages_received || 0,
-        webhook_url: data.webhook_url || '',
-        webhook_auth_header: data.webhook_auth_header || '',
-        webhook_auth_value: data.webhook_auth_value || '',
-        webhook_self_chat: data.webhook_self_chat || false,
-        webhook_message_received: data.webhook_message_received || false,
-        instance_name: data.instance_name || ''
-      });
-      setStatus(data.status);
+      await loginWith(inputId, inputToken);
       showToast('Acceso correcto');
     } catch (error) {
       showToast(error.message || 'Credenciales inválidas', 'error');
+    }
+    setLoading(false);
+  };
+
+  // Master Dashboard: open an instance directly by resolving its token via the
+  // admin endpoint — no need to type the per-instance token.
+  const openInstanceAsAdmin = async (instanceId) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/admin/${instanceId}/credentials?secret=${MASTER_PASSWORD}`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      await loginWith(data.instance_id, data.token);
+      showToast('Instancia abierta');
+    } catch (error) {
+      showToast(error.message || 'No se pudo abrir la instancia', 'error');
     }
     setLoading(false);
   };
@@ -497,7 +521,7 @@ POST /:instanceId/groups/:groupId/settings
           
           <form onSubmit={(e) => {
             e.preventDefault();
-            if (masterPassword === '8116038195') { // Temporal password till Google auth
+            if (masterPassword === MASTER_PASSWORD) {
               localStorage.setItem('admin_access', 'true');
               setIsAuthorized(true);
             } else {
@@ -613,10 +637,7 @@ POST /:instanceId/groups/:groupId/settings
             ) : (
               <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1rem'}}>
                 {allInstances.map((inst) => (
-                  <div key={inst.instance_id} className="copy-field" style={{flexDirection: 'column', alignItems: 'flex-start', padding: '1.25rem', cursor: 'pointer', border: '1px solid var(--border-color)', position: 'relative'}} onClick={() => {
-                      setInputId(inst.instance_id.replace('instance', ''));
-                      showToast('ID autollenado. Escribe tu token y haz click en Ingresar');
-                  }}>
+                  <div key={inst.instance_id} className="copy-field" style={{flexDirection: 'column', alignItems: 'flex-start', padding: '1.25rem', cursor: 'pointer', border: '1px solid var(--border-color)', position: 'relative'}} onClick={() => openInstanceAsAdmin(inst.instance_id)}>
                     <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '0.5rem', gap: '0.5rem'}}>
                       <strong style={{color: 'var(--brand-color)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '1.05rem'}} title={inst.instance_name || inst.instance_id}>
                         {inst.instance_name || inst.instance_id}
