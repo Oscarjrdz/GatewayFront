@@ -43,6 +43,21 @@ function App() {
     return () => clearInterval(interval);
   }, [instance]);
 
+  // Restore saved session on first load (revalidates the token; clears if stale).
+  useEffect(() => {
+    const saved = localStorage.getItem('gw_creds');
+    if (!saved) return;
+    try {
+      const { id, token } = JSON.parse(saved);
+      if (id && token) {
+        loginWith(id, token).catch(() => localStorage.removeItem('gw_creds'));
+      }
+    } catch {
+      localStorage.removeItem('gw_creds');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const fetchAllInstances = async () => {
     try {
       const res = await fetch(`${API_URL}/instances`);
@@ -102,6 +117,8 @@ function App() {
       instance_name: data.instance_name || ''
     });
     setStatus(data.status);
+    // Remember credentials so the session is restored on the next visit.
+    localStorage.setItem('gw_creds', JSON.stringify({ id: cleanId, token }));
   };
 
   const handleLogin = async (e) => {
@@ -256,6 +273,7 @@ function App() {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('gw_creds');
     setInstance(null);
     setStatus('loading');
     setQrCode(null);
