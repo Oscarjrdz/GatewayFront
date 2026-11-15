@@ -272,6 +272,8 @@ function App() {
     }
   };
 
+  // Close the open instance and return to the Master Dashboard (instance list).
+  // Keeps the admin session (master password) alive.
   const handleLogout = () => {
     localStorage.removeItem('gw_creds');
     setInstance(null);
@@ -279,6 +281,21 @@ function App() {
     setQrCode(null);
     setInputId('');
     setInputToken('');
+  };
+
+  // Full sign-out: ends the admin session entirely and returns to the master
+  // password screen. Clears every stored credential.
+  const handleSignOut = () => {
+    localStorage.removeItem('gw_creds');
+    localStorage.removeItem('admin_access');
+    setInstance(null);
+    setStatus('loading');
+    setQrCode(null);
+    setInputId('');
+    setInputToken('');
+    setMasterPassword('');
+    setAllInstances([]);
+    setIsAuthorized(false);
   };
 
   const handleCopyDocumentation = () => {
@@ -580,11 +597,16 @@ POST /:instanceId/groups/:groupId/settings
             <span>WhatsApp Infrastructure API</span>
           </div>
         </div>
-        {instance && (
-          <button className="btn btn-secondary" onClick={handleLogout} style={{width: 'auto'}}>
+        <div style={{display: 'flex', gap: '0.75rem'}}>
+          {instance && (
+            <button className="btn btn-secondary" onClick={handleLogout} style={{width: 'auto'}}>
+              ← Instancias
+            </button>
+          )}
+          <button className="btn btn-secondary" onClick={handleSignOut} style={{width: 'auto'}}>
             Cerrar Sesión
           </button>
-        )}
+        </div>
       </header>
 
       {!instance ? (
